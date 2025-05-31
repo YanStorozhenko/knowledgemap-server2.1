@@ -1,12 +1,15 @@
 import { APP_GUARD } from '@nestjs/core';
-
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { TopicsModule } from './topics/topics.module';
+
 import { RolesGuard } from './auth/roles.guard';
 
 @Module({
@@ -15,8 +18,6 @@ import { RolesGuard } from './auth/roles.guard';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-
-
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,13 +32,15 @@ import { RolesGuard } from './auth/roles.guard';
         synchronize: false,
         logging: true,
         ssl: configService.get<boolean>('DB_SSL')
-            ? { ca: configService.get<string>('DB_CA_PATH'), rejectUnauthorized: false }
+            ? {
+              ca: configService.get<string>('DB_CA_PATH'),
+              rejectUnauthorized: false,
+            }
             : undefined,
       }),
     }),
-
     UsersModule,
-    AuthModule,
+    TopicsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -46,7 +46,7 @@ let AuthController = class AuthController {
     async register(createUserDto) {
         const existingUser = await this.usersService.findByEmail(createUserDto.email);
         if (existingUser) {
-            throw new common_1.BadRequestException('Користувач з таким email вже існує');
+            throw new common_1.BadRequestException('Користувач з таким email вже існує!');
         }
         return this.usersService.create(createUserDto);
     }

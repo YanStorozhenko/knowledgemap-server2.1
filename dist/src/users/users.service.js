@@ -43,7 +43,6 @@ let UsersService = class UsersService {
         return user;
     }
     async findPublicUserById(id) {
-        console.log("findPublicUserById");
         return this.usersRepository.findOne({
             where: { id },
             select: ['id', 'email', 'role'],

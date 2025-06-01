@@ -1,40 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Node } from './entities/node.entity';
-import { Topic } from '../topics/entities/topic.entity';
 import { CreateNodeDto } from './dtos/create-node.dto';
 
 @Injectable()
 export class NodesService {
     constructor(
         @InjectRepository(Node)
-        private readonly nodeRepository: Repository<Node>,
-
-        @InjectRepository(Topic)
-        private readonly topicRepository: Repository<Topic>,
+        private readonly nodeRepo: Repository<Node>,
     ) {}
 
-    async create(dto: CreateNodeDto): Promise<Node> {
-        const topic = await this.topicRepository.findOneBy({ id: dto.topicId });
-        if (!topic) throw new Error('Topic not found');
-
-        const node = this.nodeRepository.create({
-            title: dto.title,
-            topic,
-            x: dto.x,
-            y: dto.y,
-            color: dto.color,
-        });
-
-        return await this.nodeRepository.save(node);
-    }
-
     async findAll(): Promise<Node[]> {
-        return this.nodeRepository.find();
+        return this.nodeRepo.find();
     }
 
-    async findOne(id: number): Promise<Node | null> {
-        return this.nodeRepository.findOne({ where: { id } });
+    async findOne(id: number): Promise<Node> {
+        const node = await this.nodeRepo.findOne({ where: { id } });
+        if (!node) throw new NotFoundException(`Node з id=${id} не знайдено`);
+        return node;
+    }
+
+    async create(dto: CreateNodeDto): Promise<Node> {
+        const node = this.nodeRepo.create(dto);
+        return this.nodeRepo.save(node);
+    }
+
+    async update(id: number, dto: CreateNodeDto): Promise<Node> {
+        const node = await this.findOne(id);
+        Object.assign(node, dto);
+        return this.nodeRepo.save(node);
+    }
+
+    async remove(id: number): Promise<void> {
+        const node = await this.findOne(id);
+        await this.nodeRepo.remove(node);
     }
 }

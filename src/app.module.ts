@@ -9,6 +9,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TopicsModule } from './topics/topics.module';
+import { NodesModule } from './nodes/nodes.module';
+import { NodeConnectionsModule } from './node-connections/node-connections.module';
 
 import { RolesGuard } from './auth/roles.guard';
 
@@ -41,6 +43,9 @@ import { RolesGuard } from './auth/roles.guard';
     }),
     UsersModule,
     TopicsModule,
+    NodesModule,
+
+    NodeConnectionsModule,
   ],
   controllers: [AppController],
   providers: [

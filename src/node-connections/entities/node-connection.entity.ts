@@ -1,14 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Node } from '../../nodes/entities/node.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('node_connections')
 export class NodeConnection {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => Node, { onDelete: 'CASCADE' })
-    fromNode: Node;
+    @Column({ name: 'from_node_id' })
+    fromNodeId: number;
 
-    @ManyToOne(() => Node, { onDelete: 'CASCADE' })
-    toNode: Node;
+    @Column({ name: 'to_node_id' })
+    toNodeId: number;
+
+    @Column({ nullable: true })
+    type: string;
 }

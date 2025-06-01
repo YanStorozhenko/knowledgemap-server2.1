@@ -49,12 +49,12 @@ async function bootstrap() {
     const guard = new (AuthGuard('jwt'))(reflector);
     console.log('🧪 JwtAuthGuard instance created:', typeof guard.canActivate === 'function');
 
-    await app.listen(process.env.PORT || 3000);
+    await app.listen(process.env.PORT || 3001);
 
 
 
-    console.log(`🚀 Server running on port ${process.env.PORT || 3000}`);
-    console.log(`📄 Swagger available at http://localhost:${process.env.PORT || 3000}/api/docs`);
+    console.log(`🚀 Server running on port ${process.env.PORT || 3001}`);
+    console.log(`📄 Swagger available at http://localhost:${process.env.PORT || 3001}/api/docs`);
 }
 
 bootstrap();

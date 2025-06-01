@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const update_user_dto_1 = require("./dtos/update-user.dto");
+const create_user_dto_1 = require("./dtos/create-user.dto");
 const roles_guard_1 = require("../auth/roles.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
 const user_entity_1 = require("./entities/user.entity");
@@ -25,13 +26,7 @@ let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
-    getAllUsers(req) {
-        console.log('User from token:', req.user);
-        console.log('rec:', req);
-        return this.usersService.findAll();
-    }
     getUsers(req) {
-        console.log('User from token:', req.user);
         return this.usersService.findAll();
     }
     findOne(id) {
@@ -43,18 +38,22 @@ let UsersController = class UsersController {
     remove(id) {
         return this.usersService.remove(+id);
     }
+    create(createUserDto) {
+        return this.usersService.create(createUserDto);
+    }
     search(name, email, role, page, limit, sortBy, sortOrder) {
-        return this.usersService.search({ name, email, role, page, limit, sortBy, sortOrder });
+        return this.usersService.search({
+            name,
+            email,
+            role,
+            page,
+            limit,
+            sortBy,
+            sortOrder,
+        });
     }
 };
 exports.UsersController = UsersController;
-__decorate([
-    (0, common_1.Get)('all'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], UsersController.prototype, "getAllUsers", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
@@ -90,6 +89,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "remove", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('search'),

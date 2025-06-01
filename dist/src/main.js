@@ -33,9 +33,9 @@ async function bootstrap() {
     const reflector = app.get(core_2.Reflector);
     const guard = new ((0, passport_1.AuthGuard)('jwt'))(reflector);
     console.log('🧪 JwtAuthGuard instance created:', typeof guard.canActivate === 'function');
-    await app.listen(process.env.PORT || 3000);
-    console.log(`🚀 Server running on port ${process.env.PORT || 3000}`);
-    console.log(`📄 Swagger available at http://localhost:${process.env.PORT || 3000}/api/docs`);
+    await app.listen(process.env.PORT || 3001);
+    console.log(`🚀 Server running on port ${process.env.PORT || 3001}`);
+    console.log(`📄 Swagger available at http://localhost:${process.env.PORT || 3001}/api/docs`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

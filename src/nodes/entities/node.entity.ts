@@ -1,8 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import {Topic} from "../../topics/entities/topic.entity";
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-
-@Entity()
+@Entity('nodes')
 export class Node {
     @PrimaryGeneratedColumn()
     id: number;
@@ -10,9 +8,8 @@ export class Node {
     @Column()
     title: string;
 
-    @ManyToOne(() => Topic, { eager: true })
-    @JoinColumn({ name: 'topic_id' })
-    topic: Topic;
+    @Column({ name: 'topic_id' })
+    topicId: number;
 
     @Column({ type: 'float', nullable: true })
     x: number;

@@ -21,9 +21,6 @@ export class UsersService {
             throw new ConflictException(`Користувач з email ${createUserDto.email} вже існує.`);
         }
 
-
-
-
         const newUser = this.usersRepository.create({
             ...createUserDto,
             password: createUserDto.password,
@@ -36,8 +33,6 @@ export class UsersService {
      * 🔹 Отримати всіх користувачів.
      */
     async findAll(): Promise<User[]> {
-
-
         return await this.usersRepository.find();
     }
 
@@ -52,18 +47,15 @@ export class UsersService {
         return user;
     }
 
-
-    //////////////////////
+    /**
+     * 🔹 Публічна інформація про користувача.
+     */
     async findPublicUserById(id: number): Promise<Pick<User, 'id' | 'email' | 'role'> | null> {
-        console.log("findPublicUserById");
         return this.usersRepository.findOne({
             where: { id },
             select: ['id', 'email', 'role'],
         });
     }
-
-
-
 
     /**
      * 🔹 Знайти користувача за email.
@@ -73,7 +65,7 @@ export class UsersService {
     }
 
     /**
-     * 🔹 Знайти користувача за email для автентифікації.
+     * 🔹 Знайти користувача для авторизації.
      */
     async findUserForAuth(email: string): Promise<User | null> {
         return this.usersRepository.findOne({
@@ -81,8 +73,6 @@ export class UsersService {
             select: ['id', 'email', 'password', 'role', 'firstName', 'lastName'],
         });
     }
-
-
 
     /**
      * 🔹 Оновити дані користувача.
@@ -120,12 +110,10 @@ export class UsersService {
             where.role = query.role;
         }
 
-        // Пагінація
         const page = query.page ? Math.max(1, Number(query.page)) : 1;
         const limit = query.limit ? Math.max(1, Number(query.limit)) : 10;
         const skip = (page - 1) * limit;
 
-        // Сортування
         const sortBy = query.sortBy || 'id';
         const sortOrder = query.sortOrder === 'DESC' ? 'DESC' : 'ASC';
 

@@ -15,6 +15,9 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
+const topics_module_1 = require("./topics/topics.module");
+const nodes_module_1 = require("./nodes/nodes.module");
+const node_connections_module_1 = require("./node-connections/node-connections.module");
 const roles_guard_1 = require("./auth/roles.guard");
 let AppModule = class AppModule {
 };
@@ -40,12 +43,17 @@ exports.AppModule = AppModule = __decorate([
                     synchronize: false,
                     logging: true,
                     ssl: configService.get('DB_SSL')
-                        ? { ca: configService.get('DB_CA_PATH'), rejectUnauthorized: false }
+                        ? {
+                            ca: configService.get('DB_CA_PATH'),
+                            rejectUnauthorized: false,
+                        }
                         : undefined,
                 }),
             }),
             users_module_1.UsersModule,
-            auth_module_1.AuthModule,
+            topics_module_1.TopicsModule,
+            nodes_module_1.NodesModule,
+            node_connections_module_1.NodeConnectionsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

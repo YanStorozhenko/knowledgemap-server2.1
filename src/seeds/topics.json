@@ -1151,7 +1151,7 @@
   },
   {
     "title": "Форматування рядків",
-    "description": "string.Format(), $"{значення:F2}", шаблонізовані рядки"
+    "description": "string.Format(), {}, шаблонізовані рядки"
   },
   {
     "title": "Escape-послідовності",

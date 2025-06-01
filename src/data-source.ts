@@ -3,6 +3,8 @@ import { DataSource } from 'typeorm';
 import 'dotenv/config';
 import { User } from './users/entities/user.entity';
 import { Topic } from './topics/entities/topic.entity';
+import { Node } from './nodes/entities/node.entity';
+import { NodeConnection } from './node-connections/entities/node-connection.entity';
 
 export const AppDataSource = new DataSource({
     type: 'mysql',
@@ -11,8 +13,15 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [User, Topic], //  всі ентіті тут
-        migrations: [__dirname + '/migrations/*.ts'],
+    entities: [
+        User,
+        Topic,
+        Node,
+        NodeConnection
+
+    ], //  всі ентіті тут
+
+         migrations: [],
     synchronize: false,
     logging: true,
 });

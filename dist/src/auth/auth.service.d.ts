@@ -9,11 +9,9 @@ export declare class AuthService {
     private readonly userAuthService;
     constructor(jwtService: JwtService, userService: UsersService, userAuthService: UserAuthService);
     createAdmin(): Promise<any>;
-    validateUser(email: string, password: string): Promise<User>;
+    validateUser(email: string, password: string): Promise<void>;
     validateUserByJwt(payload: JwtPayload): Promise<Pick<User, 'id' | 'email' | 'role'> | null>;
-    login(user: any): Promise<{
+    login(user: User): Promise<{
         access_token: string;
     }>;
-    private comparePasswords;
-    saveUserPassword(password: string): Promise<string>;
 }

@@ -16,9 +16,10 @@ async function bootstrap() {
         process.exit(1);
     });
     const app = await core_1.NestFactory.create(app_module_1.AppModule, { cors: true });
+    app.setGlobalPrefix('api');
     const config = new swagger_1.DocumentBuilder()
         .setTitle('API Documentation')
-        .setDescription('Документація API Knowladge Map')
+        .setDescription('Документація API Knowledge Map')
         .setVersion('1.0')
         .addBearerAuth({
         type: 'http',
@@ -33,9 +34,10 @@ async function bootstrap() {
     const reflector = app.get(core_2.Reflector);
     const guard = new ((0, passport_1.AuthGuard)('jwt'))(reflector);
     console.log('🧪 JwtAuthGuard instance created:', typeof guard.canActivate === 'function');
-    await app.listen(process.env.PORT || 3001);
-    console.log(`🚀 Server running on port ${process.env.PORT || 3001}`);
-    console.log(`📄 Swagger available at http://localhost:${process.env.PORT || 3001}/api/docs`);
+    const port = process.env.PORT || 3001;
+    await app.listen(port);
+    console.log(`🚀 Server running on port ${port}`);
+    console.log(`📄 Swagger available at http://localhost:${port}/api/docs`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

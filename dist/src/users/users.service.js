@@ -22,14 +22,13 @@ let UsersService = class UsersService {
         this.usersRepository = usersRepository;
     }
     async create(createUserDto) {
-        const existingUser = await this.findByEmail(createUserDto.email);
-        if (existingUser) {
-            throw new common_1.ConflictException(`Користувач з email ${createUserDto.email} вже існує.`);
+        if (createUserDto.email) {
+            const existingUser = await this.findByEmail(createUserDto.email);
+            if (existingUser) {
+                throw new common_1.ConflictException(`Користувач з email ${createUserDto.email} вже існує.`);
+            }
         }
-        const newUser = this.usersRepository.create({
-            ...createUserDto,
-            password: createUserDto.password,
-        });
+        const newUser = this.usersRepository.create(createUserDto);
         return await this.usersRepository.save(newUser);
     }
     async findAll() {
@@ -51,10 +50,13 @@ let UsersService = class UsersService {
     async findByEmail(email) {
         return await this.usersRepository.findOne({ where: { email } });
     }
+    async findByFirebaseUid(uid) {
+        return await this.usersRepository.findOne({ where: { firebase_uid: uid } });
+    }
     async findUserForAuth(email) {
         return this.usersRepository.findOne({
             where: { email },
-            select: ['id', 'email', 'password', 'role', 'firstName', 'lastName'],
+            select: ['id', 'email', 'role', 'name'],
         });
     }
     async update(id, updateUserDto) {

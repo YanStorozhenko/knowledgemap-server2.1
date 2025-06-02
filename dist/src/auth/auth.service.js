@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const bcrypt = require("bcrypt");
 const jwt_1 = require("@nestjs/jwt");
 const user_auth_service_1 = require("../user-auth/user.auth.service");
 const users_service_1 = require("../users/users.service");
@@ -24,32 +23,23 @@ let AuthService = class AuthService {
     }
     async createAdmin() {
         const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
-        const adminFirstName = process.env.ADMIN_FIRST_NAME;
-        const adminLastName = process.env.ADMIN_LAST_NAME;
+        const adminName = process.env.ADMIN_NAME || 'Admin';
+        if (!adminEmail) {
+            throw new Error('ADMIN_EMAIL не встановлено у .env');
+        }
         const existingAdmin = await this.userAuthService.findUserByEmail(adminEmail);
         if (existingAdmin) {
             return { message: 'Адміністратор вже існує' };
         }
         const newAdmin = await this.userService.create({
-            firstName: adminFirstName,
-            lastName: adminLastName,
             email: adminEmail,
-            password: adminPassword,
+            name: adminName,
             role: user_entity_1.UserRole.ADMIN,
         });
         return newAdmin;
     }
     async validateUser(email, password) {
-        const user = await this.userService.findUserForAuth(email);
-        if (!user) {
-            console.log('Користувача не знайдено');
-            throw new common_1.UnauthorizedException('Невірний email або пароль');
-        }
-        const match = await this.comparePasswords(password, user.password);
-        if (match)
-            return user;
-        throw new common_1.UnauthorizedException('Невірний email або пароль');
+        throw new common_1.UnauthorizedException('Парольна авторизація вимкнена.');
     }
     async validateUserByJwt(payload) {
         return this.userService.findPublicUserById(payload.sub);
@@ -63,13 +53,6 @@ let AuthService = class AuthService {
         return {
             access_token: this.jwtService.sign(payload),
         };
-    }
-    async comparePasswords(password, storedPassword) {
-        return bcrypt.compare(password, storedPassword);
-    }
-    async saveUserPassword(password) {
-        const salt = await bcrypt.genSalt(10);
-        return await bcrypt.hash(password, salt);
     }
 };
 exports.AuthService = AuthService;

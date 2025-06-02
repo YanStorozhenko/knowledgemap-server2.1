@@ -3,10 +3,7 @@ import { UserRole } from '../entities/user.entity';
 
 export class CreateUserDto {
     @IsNotEmpty()
-    firstName: string;
-
-    @IsNotEmpty()
-    lastName: string;
+    name: string;
 
     @IsEmail()
     email: string;

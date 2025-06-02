@@ -12,6 +12,12 @@ export declare class UsersController {
         message: string;
     }>;
     create(createUserDto: CreateUserDto): Promise<import("./entities/user.entity").User>;
+    saveAfterGoogleLogin(body: {
+        firebase_uid: string;
+        email: string;
+        name: string;
+        avatarUrl?: string;
+    }): Promise<import("./entities/user.entity").User>;
     search(name?: string, email?: string, role?: string, page?: string, limit?: string, sortBy?: string, sortOrder?: string): Promise<{
         data: import("./entities/user.entity").User[];
         total: number;

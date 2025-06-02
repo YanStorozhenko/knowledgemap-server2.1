@@ -41,6 +41,19 @@ let UsersController = class UsersController {
     create(createUserDto) {
         return this.usersService.create(createUserDto);
     }
+    async saveAfterGoogleLogin(body) {
+        const { firebase_uid, email, name, avatarUrl } = body;
+        const existingUser = await this.usersService.findByFirebaseUid(firebase_uid);
+        if (existingUser)
+            return existingUser;
+        return this.usersService.create({
+            firebase_uid,
+            email,
+            name,
+            avatarUrl,
+            role: user_entity_1.UserRole.STUDENT,
+        });
+    }
     search(name, email, role, page, limit, sortBy, sortOrder) {
         return this.usersService.search({
             name,
@@ -98,6 +111,13 @@ __decorate([
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('save'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "saveAfterGoogleLogin", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('search'),

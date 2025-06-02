@@ -1,5 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+} from 'typeorm';
 
 export enum UserRole {
     ADMIN = 'admin',
@@ -8,43 +12,26 @@ export enum UserRole {
     GUEST = 'guest',
 }
 
-@Entity()
+@Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: 'varchar', length: 100 })
-    firstName: string;
-
-    @Column({ type: 'varchar', length: 100 })
-    lastName: string;
+    @Column({ type: 'varchar', length: 128, unique: true, nullable: true })
+    firebase_uid?: string;
 
     @Column({ type: 'varchar', length: 150, unique: true })
     email: string;
 
-    @Column({ type: 'text', select: false }) // Пароль не буде відправлятися в запитах
-    password: string;
-
-    @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
-    role: UserRole;
-
-    @Column({ type: 'varchar', length: 20, nullable: true })
-    phoneNumber?: string;
+    @Column({ type: 'varchar', length: 150, nullable: true })
+    name?: string;
 
     @Column({ type: 'text', nullable: true })
     avatarUrl?: string;
 
-    @Column({ type: 'date', nullable: true })
-    dateOfBirth?: string;
-
-    @Column({ type: 'varchar', length: 255, nullable: true })
-    address?: string;
+    @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
+    role: UserRole;
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;
-
-    @BeforeInsert()
-    async hashPassword() {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
 }

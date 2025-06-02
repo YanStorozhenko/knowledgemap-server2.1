@@ -25,7 +25,6 @@ import { Request } from 'express';
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    // 🔐 Отримати всіх користувачів (тільки адміну)
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
     @Get()
@@ -33,21 +32,18 @@ export class UsersController {
         return this.usersService.findAll();
     }
 
-    // 🔐 Отримати користувача по ID (авторизованим)
     @UseGuards(JwtAuthGuard)
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.usersService.findOne(+id);
     }
 
-    // 🔐 Оновити користувача (сам собі або адміну)
     @UseGuards(JwtAuthGuard)
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return this.usersService.update(+id, updateUserDto);
     }
 
-    // 🔐 Видалити користувача (тільки адміну)
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
     @Delete(':id')
@@ -55,7 +51,6 @@ export class UsersController {
         return this.usersService.remove(+id);
     }
 
-    // 🔐 Створити нового користувача (тільки адміну)
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
     @Post()
@@ -63,7 +58,22 @@ export class UsersController {
         return this.usersService.create(createUserDto);
     }
 
-    // 🔐 Пошук користувачів із пагінацією та сортуванням
+    @Post('save')
+    async saveAfterGoogleLogin(@Body() body: { firebase_uid: string, email: string, name: string, avatarUrl?: string }) {
+        const { firebase_uid, email, name, avatarUrl } = body;
+
+        const existingUser = await this.usersService.findByFirebaseUid(firebase_uid);
+        if (existingUser) return existingUser;
+
+        return this.usersService.create({
+            firebase_uid,
+            email,
+            name,
+            avatarUrl,
+            role: UserRole.STUDENT,
+        });
+    }
+
     @UseGuards(JwtAuthGuard)
     @Get('search')
     search(

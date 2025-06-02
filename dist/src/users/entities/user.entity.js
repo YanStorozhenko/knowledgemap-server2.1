@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = exports.UserRole = void 0;
 const typeorm_1 = require("typeorm");
-const bcrypt = require("bcrypt");
 var UserRole;
 (function (UserRole) {
     UserRole["ADMIN"] = "admin";
@@ -20,9 +19,6 @@ var UserRole;
     UserRole["GUEST"] = "guest";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let User = class User {
-    async hashPassword() {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
 };
 exports.User = User;
 __decorate([
@@ -30,52 +26,30 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 128, unique: true, nullable: true }),
     __metadata("design:type", String)
-], User.prototype, "firstName", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
-    __metadata("design:type", String)
-], User.prototype, "lastName", void 0);
+], User.prototype, "firebase_uid", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 150, unique: true }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', select: false }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 150, nullable: true }),
     __metadata("design:type", String)
-], User.prototype, "password", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'enum', enum: UserRole, default: UserRole.STUDENT }),
-    __metadata("design:type", String)
-], User.prototype, "role", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
-    __metadata("design:type", String)
-], User.prototype, "phoneNumber", void 0);
+], User.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "avatarUrl", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    (0, typeorm_1.Column)({ type: 'enum', enum: UserRole, default: UserRole.STUDENT }),
     __metadata("design:type", String)
-], User.prototype, "dateOfBirth", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
-    __metadata("design:type", String)
-], User.prototype, "address", void 0);
+], User.prototype, "role", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ type: 'timestamp' }),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.BeforeInsert)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], User.prototype, "hashPassword", null);
 exports.User = User = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)('users')
 ], User);
 //# sourceMappingURL=user.entity.js.map

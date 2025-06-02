@@ -17,9 +17,8 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const users_service_1 = require("../users/users.service");
 const create_user_dto_1 = require("../users/dtos/create-user.dto");
-const login_user_dto_1 = require("../users/dtos/login-user.dto");
-const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("./jwt-auth.guard");
+const swagger_1 = require("@nestjs/swagger");
 let AuthController = class AuthController {
     constructor(authService, usersService) {
         this.authService = authService;
@@ -29,19 +28,7 @@ let AuthController = class AuthController {
         return this.authService.createAdmin();
     }
     getProtected(req) {
-        console.log('🟢 From req.user:', req.user);
         return { message: 'Access granted', user: req.user };
-    }
-    async loginAdmin() {
-        const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
-        if (!adminEmail || !adminPassword) {
-            throw new common_1.BadRequestException('Адмінські дані не встановлені в .env');
-        }
-        const adminUser = await this.usersService.findUserForAuth(adminEmail);
-        const bcrypt = require('bcrypt');
-        const isMatch = await bcrypt.compare(adminPassword, adminUser?.password ?? '');
-        return isMatch ? this.authService.login(adminUser) : { message: '❌ Пароль не збігається' };
     }
     async register(createUserDto) {
         const existingUser = await this.usersService.findByEmail(createUserDto.email);
@@ -49,10 +36,6 @@ let AuthController = class AuthController {
             throw new common_1.BadRequestException('Користувач з таким email вже існує!');
         }
         return this.usersService.create(createUserDto);
-    }
-    async login(body) {
-        const user = await this.authService.validateUser(body.email, body.password);
-        return this.authService.login(user);
     }
 };
 exports.AuthController = AuthController;
@@ -71,27 +54,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "getProtected", null);
 __decorate([
-    (0, common_1.Post)('login-admin'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "loginAdmin", null);
-__decorate([
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
-__decorate([
-    (0, common_1.Post)('login'),
-    (0, swagger_1.ApiBody)({ type: login_user_dto_1.LoginUserDto }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [login_user_dto_1.LoginUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "login", null);
 exports.AuthController = AuthController = __decorate([
+    (0, swagger_1.ApiBearerAuth)('access-token'),
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,
         users_service_1.UsersService])

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+    Injectable,
+    NotFoundException,
+    ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -15,17 +19,15 @@ export class UsersService {
     /**
      * 🔹 Створити нового користувача
      */
-    async create(createUserDto: CreateUserDto): Promise<User> {
-        const existingUser = await this.findByEmail(createUserDto.email);
-        if (existingUser) {
-            throw new ConflictException(`Користувач з email ${createUserDto.email} вже існує.`);
+    async create(createUserDto: Partial<User>): Promise<User> {
+        if (createUserDto.email) {
+            const existingUser = await this.findByEmail(createUserDto.email);
+            if (existingUser) {
+                throw new ConflictException(`Користувач з email ${createUserDto.email} вже існує.`);
+            }
         }
 
-        const newUser = this.usersRepository.create({
-            ...createUserDto,
-            password: createUserDto.password,
-        });
-
+        const newUser = this.usersRepository.create(createUserDto);
         return await this.usersRepository.save(newUser);
     }
 
@@ -65,12 +67,19 @@ export class UsersService {
     }
 
     /**
-     * 🔹 Знайти користувача для авторизації.
+     * 🔹 Знайти користувача за Firebase UID.
+     */
+    async findByFirebaseUid(uid: string): Promise<User | null> {
+        return await this.usersRepository.findOne({ where: { firebase_uid: uid } });
+    }
+
+    /**
+     * 🔹 Знайти користувача для авторизації (тільки для ручного входу).
      */
     async findUserForAuth(email: string): Promise<User | null> {
         return this.usersRepository.findOne({
             where: { email },
-            select: ['id', 'email', 'password', 'role', 'firstName', 'lastName'],
+            select: ['id', 'email', 'role', 'name'],
         });
     }
 

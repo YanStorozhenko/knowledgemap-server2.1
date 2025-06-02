@@ -1,0 +1,1 @@
+{"version":3,"file":"create-users-table.js","sourceRoot":"","sources":["../../../src/migrations/create-users-table.ts"],"names":[],"mappings":";;AAGA,4CAeC;AAlBD,gDAA+C;AAGxC,KAAK,UAAU,gBAAgB;IAClC,MAAM,WAAW,GAAgB,2BAAa,CAAC,iBAAiB,EAAE,CAAC;IACnE,MAAM,WAAW,CAAC,OAAO,EAAE,CAAC;IAE5B,MAAM,WAAW,CAAC,KAAK,CAAC;;;;;;;;KAQvB,CAAC,CAAC;IAEH,MAAM,WAAW,CAAC,OAAO,EAAE,CAAC;AAChC,CAAC"}

@@ -20,8 +20,8 @@ async function initDb() {
         // Створення таблиць
         // await CreateTopicsTable();
         // await CreateNodesTable();
-        await CreateUsersTable();
-        // await CreateNodeConnectionsTable();
+        // await CreateUsersTable();
+        await CreateNodeConnectionsTable();
 
         const topicRepo = AppDataSource.getRepository(Topic);
         const nodeRepo = AppDataSource.getRepository(Node);
@@ -63,7 +63,7 @@ async function initDb() {
         //     }
         // }
 
-        // await seedNodeConnections();
+        await seedNodeConnections();
 
 
 

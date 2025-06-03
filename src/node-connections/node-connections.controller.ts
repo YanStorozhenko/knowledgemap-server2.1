@@ -13,6 +13,11 @@ import { CreateNodeConnectionDto } from './dto/create-node-connection.dto';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
+import { plainToInstance } from 'class-transformer';
+import { NodeConnectionDto } from './dto/node-connection.dto';
+
+
+
 @ApiBearerAuth('access-token')
 @UseGuards(FirebaseAuthGuard)
 
@@ -22,8 +27,12 @@ export class NodeConnectionsController {
     constructor(private readonly service: NodeConnectionsService) {}
 
     @Get()
-    findAll() {
-        return this.service.findAll();
+    async findAll(): Promise<NodeConnectionDto[]> {
+        const raw = await this.service.findAll();
+
+
+
+        return plainToInstance(NodeConnectionDto, raw, { excludeExtraneousValues: true });
     }
 
     @Get(':id')

@@ -4,7 +4,7 @@ import { CreateNodeConnectionDto } from './dto/create-node-connection.dto';
 export declare class NodeConnectionsService {
     private readonly repo;
     constructor(repo: Repository<NodeConnection>);
-    findAll(): Promise<NodeConnection[]>;
+    findAll(): Promise<any[]>;
     findOne(id: number): Promise<NodeConnection>;
     create(dto: CreateNodeConnectionDto): Promise<NodeConnection>;
     update(id: number, dto: CreateNodeConnectionDto): Promise<NodeConnection>;

@@ -39,6 +39,9 @@ const node_entity_1 = require("../nodes/entities/node.entity");
 const node_connection_entity_1 = require("../node-connections/entities/node-connection.entity");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+function normalize(title) {
+    return title.trim().toLowerCase().replace(/[’']/g, "'");
+}
 async function seedNodeConnections() {
     const connectionRepo = data_source_1.AppDataSource.getRepository(node_connection_entity_1.NodeConnection);
     const nodeRepo = data_source_1.AppDataSource.getRepository(node_entity_1.Node);
@@ -46,30 +49,39 @@ async function seedNodeConnections() {
     const raw = fs.readFileSync(filePath, 'utf-8');
     const connections = JSON.parse(raw);
     const allNodes = await nodeRepo.find();
-    const nodeMap = new Map(allNodes.map(node => [node.title, node]));
-    let created = 0;
+    const nodeMap = new Map(allNodes.map(node => [normalize(node.title), node]));
+    let createdNodes = 0;
+    let createdConnections = 0;
     for (const { from, to } of connections) {
-        const fromNode = nodeMap.get(from);
-        const toNode = nodeMap.get(to);
-        if (fromNode && toNode) {
-            const exists = await connectionRepo.findOneBy({
-                fromNodeId: fromNode.id,
-                toNodeId: toNode.id
-            });
-            if (!exists) {
-                const conn = connectionRepo.create({
-                    fromNodeId: fromNode.id,
-                    toNodeId: toNode.id,
-                    type: 'requires',
-                });
-                await connectionRepo.save(conn);
-                created++;
-            }
+        let fromNode = nodeMap.get(normalize(from));
+        let toNode = nodeMap.get(normalize(to));
+        if (!fromNode) {
+            fromNode = nodeRepo.create({ title: from });
+            await nodeRepo.save(fromNode);
+            nodeMap.set(normalize(from), fromNode);
+            createdNodes++;
         }
-        else {
-            console.warn(`⛔ Не знайдено вузол: ${!fromNode ? `"${from}"` : ''} ${!toNode ? `"${to}"` : ''}`);
+        if (!toNode) {
+            toNode = nodeRepo.create({ title: to });
+            await nodeRepo.save(toNode);
+            nodeMap.set(normalize(to), toNode);
+            createdNodes++;
+        }
+        const exists = await connectionRepo.findOneBy({
+            fromNodeId: fromNode.id,
+            toNodeId: toNode.id,
+        });
+        if (!exists) {
+            const conn = connectionRepo.create({
+                fromNodeId: fromNode.id,
+                toNodeId: toNode.id,
+                type: 'requires',
+            });
+            await connectionRepo.save(conn);
+            createdConnections++;
         }
     }
-    console.log(`🔗 Зв’язків створено: ${created}`);
+    console.log(`📌 Додано нових вузлів: ${createdNodes}`);
+    console.log(`🔗 Створено зв’язків: ${createdConnections}`);
 }
 //# sourceMappingURL=seed-node-connections.js.map

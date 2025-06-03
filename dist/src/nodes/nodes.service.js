@@ -17,9 +17,11 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const node_entity_1 = require("./entities/node.entity");
+const node_connection_entity_1 = require("../node-connections/entities/node-connection.entity");
 let NodesService = class NodesService {
-    constructor(nodeRepo) {
+    constructor(nodeRepo, connectionRepo) {
         this.nodeRepo = nodeRepo;
+        this.connectionRepo = connectionRepo;
     }
     async findAll() {
         return this.nodeRepo.find();
@@ -43,11 +45,87 @@ let NodesService = class NodesService {
         const node = await this.findOne(id);
         await this.nodeRepo.remove(node);
     }
+    async getGraph() {
+        const allNodes = await this.nodeRepo.find();
+        const allConnections = await this.connectionRepo.find();
+        const usedNodeIds = new Set();
+        for (const conn of allConnections) {
+            if (Number.isInteger(conn.fromNodeId) &&
+                Number.isInteger(conn.toNodeId)) {
+                usedNodeIds.add(conn.fromNodeId);
+                usedNodeIds.add(conn.toNodeId);
+            }
+        }
+        const nodes = allNodes.filter(n => Number.isInteger(n.id) && usedNodeIds.has(n.id));
+        const validNodeIds = new Set(nodes.map(n => n.id));
+        const inDegree = new Map();
+        const graph = new Map();
+        for (const node of nodes) {
+            inDegree.set(node.id, 0);
+            graph.set(node.id, []);
+        }
+        for (const conn of allConnections) {
+            const { fromNodeId, toNodeId } = conn;
+            if (!Number.isInteger(fromNodeId) ||
+                !Number.isInteger(toNodeId) ||
+                !validNodeIds.has(fromNodeId) ||
+                !validNodeIds.has(toNodeId)) {
+                console.warn(`⚠️ Пропущено з’єднання: ${fromNodeId} → ${toNodeId}`);
+                continue;
+            }
+            graph.get(fromNodeId).push(toNodeId);
+            inDegree.set(toNodeId, (inDegree.get(toNodeId) || 0) + 1);
+        }
+        const queue = [];
+        const levels = new Map();
+        let processedNodes = 0;
+        for (const [id, deg] of inDegree.entries()) {
+            if (deg === 0) {
+                queue.push({ id, level: 0 });
+                levels.set(id, 0);
+            }
+        }
+        while (queue.length > 0) {
+            const { id, level } = queue.shift();
+            processedNodes++;
+            for (const next of graph.get(id)) {
+                const newInDegree = inDegree.get(next) - 1;
+                inDegree.set(next, newInDegree);
+                if (newInDegree === 0) {
+                    queue.push({ id: next, level: level + 1 });
+                    levels.set(next, level + 1);
+                }
+            }
+        }
+        if (processedNodes < nodes.length) {
+            const unprocessed = nodes.filter(n => !levels.has(n.id));
+            console.warn('⚠️ Деякі вузли не оброблені (можливо цикл):', unprocessed.map(n => n.id));
+        }
+        const rankedNodes = nodes
+            .filter(n => levels.has(n.id))
+            .map(n => ({
+            ...n,
+            level: levels.get(n.id),
+        }));
+        const edges = allConnections
+            .filter(c => Number.isInteger(c.fromNodeId) &&
+            Number.isInteger(c.toNodeId) &&
+            validNodeIds.has(c.fromNodeId) &&
+            validNodeIds.has(c.toNodeId))
+            .map(c => ({
+            from: c.fromNodeId,
+            to: c.toNodeId,
+            label: c.type ?? 'unknown',
+        }));
+        return { nodes: rankedNodes, edges };
+    }
 };
 exports.NodesService = NodesService;
 exports.NodesService = NodesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(node_entity_1.Node)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(node_connection_entity_1.NodeConnection)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], NodesService);
 //# sourceMappingURL=nodes.service.js.map

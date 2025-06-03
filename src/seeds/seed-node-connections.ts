@@ -4,6 +4,10 @@ import { NodeConnection } from '../node-connections/entities/node-connection.ent
 import * as fs from 'fs';
 import * as path from 'path';
 
+function normalize(title: string): string {
+    return title.trim().toLowerCase().replace(/[’']/g, "'");
+}
+
 export async function seedNodeConnections() {
     const connectionRepo = AppDataSource.getRepository(NodeConnection);
     const nodeRepo = AppDataSource.getRepository(Node);
@@ -12,37 +16,50 @@ export async function seedNodeConnections() {
     const raw = fs.readFileSync(filePath, 'utf-8');
     const connections = JSON.parse(raw) as { from: string; to: string }[];
 
-    // Читання всіх вузлів у мапу
+    // Отримуємо наявні вузли
     const allNodes = await nodeRepo.find();
-    const nodeMap = new Map(allNodes.map(node => [node.title, node]));
+    const nodeMap = new Map(allNodes.map(node => [normalize(node.title), node]));
 
-    let created = 0;
+    let createdNodes = 0;
+    let createdConnections = 0;
 
     for (const { from, to } of connections) {
-        const fromNode = nodeMap.get(from);
-        const toNode = nodeMap.get(to);
+        let fromNode = nodeMap.get(normalize(from));
+        let toNode = nodeMap.get(normalize(to));
 
-        if (fromNode && toNode) {
-            const exists = await connectionRepo.findOneBy({
+        // Якщо вузли відсутні — створити їх
+        if (!fromNode) {
+            fromNode = nodeRepo.create({ title: from });
+            await nodeRepo.save(fromNode);
+            nodeMap.set(normalize(from), fromNode);
+            createdNodes++;
+        }
+
+        if (!toNode) {
+            toNode = nodeRepo.create({ title: to });
+            await nodeRepo.save(toNode);
+            nodeMap.set(normalize(to), toNode);
+            createdNodes++;
+        }
+
+        // Створити зв’язок, якщо його ще нема
+        const exists = await connectionRepo.findOneBy({
+            fromNodeId: fromNode.id,
+            toNodeId: toNode.id,
+        });
+
+        if (!exists) {
+            const conn = connectionRepo.create({
                 fromNodeId: fromNode.id,
-
-                toNodeId: toNode.id
+                toNodeId: toNode.id,
+                type: 'requires',
             });
 
-            if (!exists) {
-                const conn = connectionRepo.create({
-                    fromNodeId: fromNode.id,
-                    toNodeId: toNode.id,
-                    type: 'requires',
-                });
-
-                await connectionRepo.save(conn);
-                created++;
-            }
-        } else {
-            console.warn(`⛔ Не знайдено вузол: ${!fromNode ? `"${from}"` : ''} ${!toNode ? `"${to}"` : ''}`);
+            await connectionRepo.save(conn);
+            createdConnections++;
         }
     }
 
-    console.log(`🔗 Зв’язків створено: ${created}`);
+    console.log(`📌 Додано нових вузлів: ${createdNodes}`);
+    console.log(`🔗 Створено зв’язків: ${createdConnections}`);
 }

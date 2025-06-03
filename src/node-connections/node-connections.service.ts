@@ -11,9 +11,21 @@ export class NodeConnectionsService {
         private readonly repo: Repository<NodeConnection>,
     ) {}
 
-    async findAll(): Promise<NodeConnection[]> {
-        return this.repo.find();
+    async findAll(): Promise<any[]> {
+        const raw = await this.repo.find();
+
+        console.log(raw);
+
+
+        return raw.map(({ id, fromNodeId, toNodeId, type }) => ({
+            id,
+            fromNodeId,
+            toNodeId,
+            type,
+        }));
     }
+
+
 
     async findOne(id: number): Promise<NodeConnection> {
         const item = await this.repo.findOneBy({ id });

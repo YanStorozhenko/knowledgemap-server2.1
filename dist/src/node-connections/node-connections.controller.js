@@ -18,12 +18,15 @@ const node_connections_service_1 = require("./node-connections.service");
 const create_node_connection_dto_1 = require("./dto/create-node-connection.dto");
 const firebase_auth_guard_1 = require("../auth/firebase-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
+const node_connection_dto_1 = require("./dto/node-connection.dto");
 let NodeConnectionsController = class NodeConnectionsController {
     constructor(service) {
         this.service = service;
     }
-    findAll() {
-        return this.service.findAll();
+    async findAll() {
+        const raw = await this.service.findAll();
+        return (0, class_transformer_1.plainToInstance)(node_connection_dto_1.NodeConnectionDto, raw, { excludeExtraneousValues: true });
     }
     findOne(id) {
         return this.service.findOne(+id);
@@ -43,7 +46,7 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], NodeConnectionsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),

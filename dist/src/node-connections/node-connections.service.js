@@ -22,7 +22,14 @@ let NodeConnectionsService = class NodeConnectionsService {
         this.repo = repo;
     }
     async findAll() {
-        return this.repo.find();
+        const raw = await this.repo.find();
+        console.log(raw);
+        return raw.map(({ id, fromNodeId, toNodeId, type }) => ({
+            id,
+            fromNodeId,
+            toNodeId,
+            type,
+        }));
     }
     async findOne(id) {
         const item = await this.repo.findOneBy({ id });

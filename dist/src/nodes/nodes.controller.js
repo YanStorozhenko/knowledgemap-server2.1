@@ -16,7 +16,7 @@ exports.NodesController = void 0;
 const common_1 = require("@nestjs/common");
 const nodes_service_1 = require("./nodes.service");
 const create_node_dto_1 = require("./dtos/create-node.dto");
-const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const firebase_auth_guard_1 = require("../auth/firebase-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
 let NodesController = class NodesController {
     constructor(nodesService) {
@@ -76,7 +76,7 @@ __decorate([
 ], NodesController.prototype, "remove", null);
 exports.NodesController = NodesController = __decorate([
     (0, swagger_1.ApiBearerAuth)('access-token'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
     (0, common_1.Controller)('nodes'),
     __metadata("design:paramtypes", [nodes_service_1.NodesService])
 ], NodesController);

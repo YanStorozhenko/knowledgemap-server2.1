@@ -41,23 +41,23 @@ export class UsersService {
     /**
      * 🔹 Отримати одного користувача за ID.
      */
-    async findOne(id: number): Promise<User> {
-        const user = await this.usersRepository.findOne({ where: { id } });
-        if (!user) {
-            throw new NotFoundException(`Користувача з ID ${id} не знайдено.`);
-        }
-        return user;
-    }
+    // async findOne(id: number): Promise<User> {
+    //     const user = await this.usersRepository.findOne({ where: { id } });
+    //     if (!user) {
+    //         throw new NotFoundException(`Користувача з ID ${id} не знайдено.`);
+    //     }
+    //     return user;
+    // }
 
-    /**
-     * 🔹 Публічна інформація про користувача.
-     */
-    async findPublicUserById(id: number): Promise<Pick<User, 'id' | 'email' | 'role'> | null> {
-        return this.usersRepository.findOne({
-            where: { id },
-            select: ['id', 'email', 'role'],
-        });
-    }
+    // /**
+    //  * 🔹 Публічна інформація про користувача.
+    //  */
+    // async findPublicUserById(id: number): Promise<Pick<User, 'id' | 'email' | 'role'> | null> {
+    //     return this.usersRepository.findOne({
+    //         where: { id },
+    //         select: ['id', 'email', 'role'],
+    //     });
+    // }
 
     /**
      * 🔹 Знайти користувача за email.
@@ -66,12 +66,21 @@ export class UsersService {
         return await this.usersRepository.findOne({ where: { email } });
     }
 
+
     /**
-     * 🔹 Знайти користувача за Firebase UID.
+     * 🔹 Отримати коротку інформацію про користувача за Firebase UID (для /me).
      */
-    async findByFirebaseUid(uid: string): Promise<User | null> {
-        return await this.usersRepository.findOne({ where: { firebase_uid: uid } });
+    async findByFirebaseUid(uid: string): Promise<Pick<User, 'email' | 'name' | 'role'>> {
+        const user = await this.usersRepository.findOne({
+            where: { firebase_uid: uid },
+            select: ['email', 'name', 'role'],
+        });
+
+        if (!user) throw new NotFoundException('Користувача не знайдено');
+
+        return user;
     }
+
 
     /**
      * 🔹 Знайти користувача для авторизації (тільки для ручного входу).
@@ -86,20 +95,20 @@ export class UsersService {
     /**
      * 🔹 Оновити дані користувача.
      */
-    async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-        const user = await this.findOne(id);
-        await this.usersRepository.update(id, updateUserDto);
-        return this.findOne(id);
-    }
+    // async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    //     const user = await this.findOne(id);
+    //     await this.usersRepository.update(id, updateUserDto);
+    //     return this.findOne(id);
+    // }
 
     /**
      * 🔹 Видалити користувача.
      */
-    async remove(id: number): Promise<{ message: string }> {
-        const user = await this.findOne(id);
-        await this.usersRepository.delete(id);
-        return { message: `Користувач ${user.email} успішно видалений.` };
-    }
+    // async remove(id: number): Promise<{ message: string }> {
+    //     const user = await this.findOne(id);
+    //     await this.usersRepository.delete(id);
+    //     return { message: `Користувач ${user.email} успішно видалений.` };
+    // }
 
     /**
      * 🔹 Пошук користувачів за полями (з пагінацією та сортуванням).

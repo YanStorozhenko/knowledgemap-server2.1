@@ -15,28 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
-const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
-const update_user_dto_1 = require("./dtos/update-user.dto");
 const create_user_dto_1 = require("./dtos/create-user.dto");
 const roles_guard_1 = require("../auth/roles.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
 const user_entity_1 = require("./entities/user.entity");
 const swagger_1 = require("@nestjs/swagger");
+const firebase_auth_guard_1 = require("../auth/firebase-auth.guard");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
     getUsers(req) {
         return this.usersService.findAll();
-    }
-    findOne(id) {
-        return this.usersService.findOne(+id);
-    }
-    update(id, updateUserDto) {
-        return this.usersService.update(+id, updateUserDto);
-    }
-    remove(id) {
-        return this.usersService.remove(+id);
     }
     create(createUserDto) {
         return this.usersService.create(createUserDto);
@@ -54,6 +44,15 @@ let UsersController = class UsersController {
             role: user_entity_1.UserRole.STUDENT,
         });
     }
+    async getMe(req) {
+        const firebaseUid = req.user.uid;
+        const user = await this.usersService.findByFirebaseUid(firebaseUid);
+        return {
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        };
+    }
     search(name, email, role, page, limit, sortBy, sortOrder) {
         return this.usersService.search({
             name,
@@ -68,7 +67,7 @@ let UsersController = class UsersController {
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),
@@ -77,33 +76,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getUsers", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], UsersController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
-    __metadata("design:returntype", void 0)
-], UsersController.prototype, "update", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], UsersController.prototype, "remove", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
@@ -119,7 +92,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "saveAfterGoogleLogin", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
     (0, common_1.Get)('search'),
     __param(0, (0, common_1.Query)('name')),
     __param(1, (0, common_1.Query)('email')),

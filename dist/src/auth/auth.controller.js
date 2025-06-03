@@ -17,7 +17,7 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const users_service_1 = require("../users/users.service");
 const create_user_dto_1 = require("../users/dtos/create-user.dto");
-const jwt_auth_guard_1 = require("./jwt-auth.guard");
+const firebase_auth_guard_1 = require("./firebase-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
 let AuthController = class AuthController {
     constructor(authService, usersService) {
@@ -28,7 +28,10 @@ let AuthController = class AuthController {
         return this.authService.createAdmin();
     }
     getProtected(req) {
-        return { message: 'Access granted', user: req.user };
+        return {
+            message: '✅ Access granted (Firebase Token Valid)',
+            user: req.user,
+        };
     }
     async register(createUserDto) {
         const existingUser = await this.usersService.findByEmail(createUserDto.email);
@@ -46,7 +49,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerAdmin", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
     (0, common_1.Get)('protected'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),

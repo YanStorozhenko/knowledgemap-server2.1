@@ -10,11 +10,13 @@ import {
 } from '@nestjs/common';
 import { NodeConnectionsService } from './node-connections.service';
 import { CreateNodeConnectionDto } from './dto/create-node-connection.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
+@UseGuards(FirebaseAuthGuard)
+
+
 @Controller('node-connections')
 export class NodeConnectionsController {
     constructor(private readonly service: NodeConnectionsService) {}

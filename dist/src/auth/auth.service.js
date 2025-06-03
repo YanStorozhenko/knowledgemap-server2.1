@@ -11,13 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const jwt_1 = require("@nestjs/jwt");
-const user_auth_service_1 = require("../user-auth/user.auth.service");
 const users_service_1 = require("../users/users.service");
+const user_auth_service_1 = require("../user-auth/user.auth.service");
 const user_entity_1 = require("../users/entities/user.entity");
 let AuthService = class AuthService {
-    constructor(jwtService, userService, userAuthService) {
-        this.jwtService = jwtService;
+    constructor(userService, userAuthService) {
         this.userService = userService;
         this.userAuthService = userAuthService;
     }
@@ -38,28 +36,11 @@ let AuthService = class AuthService {
         });
         return newAdmin;
     }
-    async validateUser(email, password) {
-        throw new common_1.UnauthorizedException('Парольна авторизація вимкнена.');
-    }
-    async validateUserByJwt(payload) {
-        return this.userService.findPublicUserById(payload.sub);
-    }
-    async login(user) {
-        const payload = {
-            sub: user.id,
-            email: user.email,
-            role: user.role,
-        };
-        return {
-            access_token: this.jwtService.sign(payload),
-        };
-    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [jwt_1.JwtService,
-        users_service_1.UsersService,
+    __metadata("design:paramtypes", [users_service_1.UsersService,
         user_auth_service_1.UserAuthService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

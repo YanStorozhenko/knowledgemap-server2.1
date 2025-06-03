@@ -10,8 +10,9 @@ import {
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dtos/create-user.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { FirebaseAuthGuard } from './firebase-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Request } from 'express';
 
 @ApiBearerAuth('access-token')
 @Controller('auth')
@@ -27,14 +28,17 @@ export class AuthController {
         return this.authService.createAdmin();
     }
 
-    // 🔐 Захищений ендпойнт — перевірка токена
-    @UseGuards(JwtAuthGuard)
+    // 🔐 Захищений ендпойнт — перевірка токена Firebase
+    @UseGuards(FirebaseAuthGuard)
     @Get('protected')
-    getProtected(@Req() req) {
-        return { message: 'Access granted', user: req.user };
+    getProtected(@Req() req: Request) {
+        return {
+            message: '✅ Access granted (Firebase Token Valid)',
+            user: req.user, // це декодований Firebase токен (uid, email тощо)
+        };
     }
 
-    // ❌ Парольна реєстрація більше не використовується, але залишено для гнучкості
+    // ✅ Опційна ручна реєстрація користувача (через email)
     @Post('register')
     async register(@Body() createUserDto: CreateUserDto) {
         const existingUser = await this.usersService.findByEmail(createUserDto.email);

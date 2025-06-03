@@ -34,40 +34,23 @@ let UsersService = class UsersService {
     async findAll() {
         return await this.usersRepository.find();
     }
-    async findOne(id) {
-        const user = await this.usersRepository.findOne({ where: { id } });
-        if (!user) {
-            throw new common_1.NotFoundException(`Користувача з ID ${id} не знайдено.`);
-        }
-        return user;
-    }
-    async findPublicUserById(id) {
-        return this.usersRepository.findOne({
-            where: { id },
-            select: ['id', 'email', 'role'],
-        });
-    }
     async findByEmail(email) {
         return await this.usersRepository.findOne({ where: { email } });
     }
     async findByFirebaseUid(uid) {
-        return await this.usersRepository.findOne({ where: { firebase_uid: uid } });
+        const user = await this.usersRepository.findOne({
+            where: { firebase_uid: uid },
+            select: ['email', 'name', 'role'],
+        });
+        if (!user)
+            throw new common_1.NotFoundException('Користувача не знайдено');
+        return user;
     }
     async findUserForAuth(email) {
         return this.usersRepository.findOne({
             where: { email },
             select: ['id', 'email', 'role', 'name'],
         });
-    }
-    async update(id, updateUserDto) {
-        const user = await this.findOne(id);
-        await this.usersRepository.update(id, updateUserDto);
-        return this.findOne(id);
-    }
-    async remove(id) {
-        const user = await this.findOne(id);
-        await this.usersRepository.delete(id);
-        return { message: `Користувач ${user.email} успішно видалений.` };
     }
     async search(query) {
         const where = {};

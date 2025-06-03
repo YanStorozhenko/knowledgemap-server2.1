@@ -10,4 +10,5 @@
 node_modules/
 .env
 ca.pem
+src/config/firebase-service-account.json
 

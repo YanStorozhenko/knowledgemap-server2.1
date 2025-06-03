@@ -1,50 +1,32 @@
+// src/auth/roles.guard.ts
 
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import {
+    Injectable,
+    CanActivate,
+    ExecutionContext,
+    ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
-import { ROLES_KEY } from './roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
-import {ConfigService} from "@nestjs/config";
+import { ROLES_KEY } from './roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-    constructor(
-        private reflector: Reflector,
-        private jwtService: JwtService,
-        private configService: ConfigService,
-    ) {}
+    constructor(private reflector: Reflector) {}
 
     canActivate(context: ExecutionContext): boolean {
         const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
             context.getHandler(),
             context.getClass(),
         ]);
-        if (!requiredRoles) {
-            return true;
-        }
 
-        const request = context.switchToHttp().getRequest<Request>();
+        if (!requiredRoles || requiredRoles.length === 0) return true;
 
-        const authHeader = request.headers['authorization'];
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new ForbiddenException('Не вказано токен авторизації');
-        }
+        const { user } = context.switchToHttp().getRequest();
+        const userRole = user?.role;
 
-        const token = authHeader.split(' ')[1];
-        let user;
-
-        try {
-            user = this.jwtService.verify(token, {
-                secret: this.configService.get<string>('JWT_SECRET'),
-            });
-        } catch (e) {
-            throw new ForbiddenException('Невірний токен');
-        }
-
-
-        if (!user || !requiredRoles.includes(user.role as UserRole)) {
-            throw new ForbiddenException('У вас немає прав доступу');
+        if (!userRole || !requiredRoles.includes(userRole)) {
+            throw new ForbiddenException('Недостатньо прав доступу');
         }
 
         return true;

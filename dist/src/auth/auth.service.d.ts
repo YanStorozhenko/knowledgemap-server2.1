@@ -1,17 +1,8 @@
-import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from './jwt-payload.interface';
-import { UserAuthService } from '../user-auth/user.auth.service';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/entities/user.entity';
+import { UserAuthService } from '../user-auth/user.auth.service';
 export declare class AuthService {
-    private readonly jwtService;
     private readonly userService;
     private readonly userAuthService;
-    constructor(jwtService: JwtService, userService: UsersService, userAuthService: UserAuthService);
+    constructor(userService: UsersService, userAuthService: UserAuthService);
     createAdmin(): Promise<any>;
-    validateUser(email: string, password: string): Promise<void>;
-    validateUserByJwt(payload: JwtPayload): Promise<Pick<User, 'id' | 'email' | 'role'> | null>;
-    login(user: User): Promise<{
-        access_token: string;
-    }>;
 }

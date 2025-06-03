@@ -12,40 +12,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RolesGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
-const jwt_1 = require("@nestjs/jwt");
 const roles_decorator_1 = require("./roles.decorator");
-const config_1 = require("@nestjs/config");
 let RolesGuard = class RolesGuard {
-    constructor(reflector, jwtService, configService) {
+    constructor(reflector) {
         this.reflector = reflector;
-        this.jwtService = jwtService;
-        this.configService = configService;
     }
     canActivate(context) {
         const requiredRoles = this.reflector.getAllAndOverride(roles_decorator_1.ROLES_KEY, [
             context.getHandler(),
             context.getClass(),
         ]);
-        if (!requiredRoles) {
+        if (!requiredRoles || requiredRoles.length === 0)
             return true;
-        }
-        const request = context.switchToHttp().getRequest();
-        const authHeader = request.headers['authorization'];
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new common_1.ForbiddenException('Не вказано токен авторизації');
-        }
-        const token = authHeader.split(' ')[1];
-        let user;
-        try {
-            user = this.jwtService.verify(token, {
-                secret: this.configService.get('JWT_SECRET'),
-            });
-        }
-        catch (e) {
-            throw new common_1.ForbiddenException('Невірний токен');
-        }
-        if (!user || !requiredRoles.includes(user.role)) {
-            throw new common_1.ForbiddenException('У вас немає прав доступу');
+        const { user } = context.switchToHttp().getRequest();
+        const userRole = user?.role;
+        if (!userRole || !requiredRoles.includes(userRole)) {
+            throw new common_1.ForbiddenException('Недостатньо прав доступу');
         }
         return true;
     }
@@ -53,8 +35,6 @@ let RolesGuard = class RolesGuard {
 exports.RolesGuard = RolesGuard;
 exports.RolesGuard = RolesGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [core_1.Reflector,
-        jwt_1.JwtService,
-        config_1.ConfigService])
+    __metadata("design:paramtypes", [core_1.Reflector])
 ], RolesGuard);
 //# sourceMappingURL=roles.guard.js.map

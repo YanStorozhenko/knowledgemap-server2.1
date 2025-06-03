@@ -6,6 +6,9 @@ export class UserAuthService {
     constructor(private readonly usersService: UsersService) {}
 
     async findUserByEmail(email: string) {
+
+        
+
         return this.usersService.findByEmail(email);
     }
 }

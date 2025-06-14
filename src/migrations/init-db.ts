@@ -1,79 +1,38 @@
-import { AppDataSource } from '../data-source';
-import { CreateTopicsTable } from './create-topics-table';
-import { CreateNodesTable } from './create-nodes-table';
-import { CreateUsersTable } from './create-users-table';
-import { CreateNodeConnectionsTable } from './create-node-connections-table';
+import { exec } from 'child_process';
+import path from 'path';
 
-import { seedNodeConnections } from '../seeds/seed-node-connections';
+const scripts = [
+   // 'src/migrations/init-topics.ts',
+    'src/migrations/init-node-connections.ts',
+    // 'src/migrations/init-users.ts',
+     'src/migrations/init-user-topic-progress.ts'
+];
 
-
-import { Topic } from '../topics/entities/topic.entity';
-import { Node } from '../nodes/entities/node.entity';
-
-import * as fs from 'fs';
-import * as path from 'path';
+async function runScript(scriptPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const fullPath = path.resolve(scriptPath);
+        console.log(`▶️ Запуск: ${fullPath}`);
+        exec(`npx ts-node ${fullPath}`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`❌ Помилка у ${scriptPath}:\n`, stderr);
+                reject(error);
+                return;
+            }
+            console.log(stdout);
+            resolve();
+        });
+    });
+}
 
 async function initDb() {
     try {
-        await AppDataSource.initialize();
-
-        // Створення таблиць
-        // await CreateTopicsTable();
-        // await CreateNodesTable();
-        // await CreateUsersTable();
-        await CreateNodeConnectionsTable();
-
-        const topicRepo = AppDataSource.getRepository(Topic);
-        const nodeRepo = AppDataSource.getRepository(Node);
-
-        // Шлях до JSON-файлу з темами
-        const filePath = path.join(__dirname, '../seeds/topics.json');
-        const raw = fs.readFileSync(filePath, 'utf-8');
-        const topicData = JSON.parse(raw);
-
-        let createdTopics = 0;
-        let createdNodes = 0;
-
-        // Створюємо теми
-        // for (const data of topicData) {
-        //     const exists = await topicRepo.findOneBy({ title: data.title });
-        //     if (!exists) {
-        //         const topic = topicRepo.create(data);
-        //         await topicRepo.save(topic);
-        //         createdTopics++;
-        //     }
-        // }
-
-        // Створюємо вузли (по одному на кожну тему)
-        // const allTopics = await topicRepo.find();
-        // for (const topic of allTopics) {
-        //     const existingNode = await nodeRepo.findOne({ where: { topic: { id: topic.id } } });
-        //     if (!existingNode) {
-        //         const node = nodeRepo.create({
-        //             title: topic.title,
-        //             topic,
-        //             x: undefined,
-        //             y: undefined,
-        //             color: undefined
-        //         } as Partial<Node>);
-        //
-        //
-        //         await nodeRepo.save(node);
-        //         createdNodes++;
-        //     }
-        // }
-
-        await seedNodeConnections();
-
-
-
-        console.log(`✅ Topics created: ${createdTopics}`);
-        console.log(`✅ Nodes created: ${createdNodes}`);
-        console.log('🎉 База успішно ініціалізована');
+        for (const script of scripts) {
+            await runScript(script);
+        }
+        console.log('🎉 Уся база ініціалізована успішно');
         process.exit(0);
-
     } catch (e) {
-        console.error('❌ Init error:', e);
+        console.error('❌ Помилка при ініціалізації бази:', e);
         process.exit(1);
     }
 }

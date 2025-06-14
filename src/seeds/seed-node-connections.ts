@@ -52,7 +52,7 @@ export async function seedNodeConnections() {
             const conn = connectionRepo.create({
                 fromNodeId: fromNode.id,
                 toNodeId: toNode.id,
-                type: 'requires',
+                type: '',
             });
 
             await connectionRepo.save(conn);

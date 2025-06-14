@@ -34,6 +34,8 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const data_source_1 = require("../data-source");
+const create_topics_table_1 = require("./create-topics-table");
+const create_nodes_table_1 = require("./create-nodes-table");
 const create_node_connections_table_1 = require("./create-node-connections-table");
 const seed_node_connections_1 = require("../seeds/seed-node-connections");
 const topic_entity_1 = require("../topics/entities/topic.entity");
@@ -43,6 +45,8 @@ const path = __importStar(require("path"));
 async function initDb() {
     try {
         await data_source_1.AppDataSource.initialize();
+        await (0, create_topics_table_1.CreateTopicsTable)();
+        await (0, create_nodes_table_1.CreateNodesTable)();
         await (0, create_node_connections_table_1.CreateNodeConnectionsTable)();
         const topicRepo = data_source_1.AppDataSource.getRepository(topic_entity_1.Topic);
         const nodeRepo = data_source_1.AppDataSource.getRepository(node_entity_1.Node);
@@ -51,6 +55,29 @@ async function initDb() {
         const topicData = JSON.parse(raw);
         let createdTopics = 0;
         let createdNodes = 0;
+        for (const data of topicData) {
+            const exists = await topicRepo.findOneBy({ title: data.title });
+            if (!exists) {
+                const topic = topicRepo.create(data);
+                await topicRepo.save(topic);
+                createdTopics++;
+            }
+        }
+        const allTopics = await topicRepo.find();
+        for (const topic of allTopics) {
+            const existingNode = await nodeRepo.findOne({ where: { topicId: topic.id } });
+            if (!existingNode) {
+                const node = nodeRepo.create({
+                    title: topic.title,
+                    topic,
+                    x: undefined,
+                    y: undefined,
+                    color: undefined
+                });
+                await nodeRepo.save(node);
+                createdNodes++;
+            }
+        }
         await (0, seed_node_connections_1.seedNodeConnections)();
         console.log(`✅ Topics created: ${createdTopics}`);
         console.log(`✅ Nodes created: ${createdNodes}`);

@@ -1,11 +1,16 @@
-import { exec } from 'child_process';
-import path from 'path';
+import {seedNodeConnections} from "../seeds/seed-node-connections";
+import {CreateUserTopicProgressTable} from "./create-user-topic-progress-table";
+import {AppDataSource} from "../data-source";
+
+const { exec } = require('child_process');
+const path = require('path');
 
 const scripts = [
    // 'src/migrations/init-topics.ts',
-    'src/migrations/init-node-connections.ts',
-    // 'src/migrations/init-users.ts',
-     'src/migrations/init-user-topic-progress.ts'
+   // 'src/migrations/create-node-connections-table.ts',
+        // 'src/migrations/init-users.ts',
+     'src/migrations/create-user-topic-progress-table.ts',
+  //  'src/seeds/seed-node-connections.ts'
 ];
 
 async function runScript(scriptPath: string): Promise<void> {
@@ -29,6 +34,14 @@ async function initDb() {
         for (const script of scripts) {
             await runScript(script);
         }
+
+
+        await AppDataSource.initialize();
+        //await seedNodeConnections();
+        await CreateUserTopicProgressTable();
+
+
+
         console.log('🎉 Уся база ініціалізована успішно');
         process.exit(0);
     } catch (e) {
@@ -36,5 +49,8 @@ async function initDb() {
         process.exit(1);
     }
 }
+
+
+
 
 initDb();

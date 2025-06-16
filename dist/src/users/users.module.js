@@ -13,14 +13,23 @@ const typeorm_1 = require("@nestjs/typeorm");
 const user_entity_1 = require("./entities/user.entity");
 const users_service_1 = require("./users.service");
 const users_controller_1 = require("./users.controller");
+const user_topic_progress_entity_1 = require("./entities/user-topic-progress.entity");
+const user_topic_progress_service_1 = require("./user-topic-progress.service");
+const user_topic_progress_controller_1 = require("./user-topic-progress.controller");
+const topic_entity_1 = require("../topics/entities/topic.entity");
+const topics_module_1 = require("../topics/topics.module");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
 exports.UsersModule = UsersModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]), jwt_1.JwtModule],
-        providers: [users_service_1.UsersService],
-        controllers: [users_controller_1.UsersController],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, user_topic_progress_entity_1.UserTopicProgress, topic_entity_1.Topic]),
+            jwt_1.JwtModule,
+            topics_module_1.TopicsModule,
+        ],
+        providers: [users_service_1.UsersService, user_topic_progress_service_1.UserTopicProgressService],
+        controllers: [users_controller_1.UsersController, user_topic_progress_controller_1.UserTopicProgressController],
         exports: [users_service_1.UsersService],
     })
 ], UsersModule);

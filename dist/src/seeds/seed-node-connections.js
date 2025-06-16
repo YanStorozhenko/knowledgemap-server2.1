@@ -43,6 +43,9 @@ function normalize(title) {
     return title.trim().toLowerCase().replace(/[’']/g, "'");
 }
 async function seedNodeConnections() {
+    if (!data_source_1.AppDataSource.isInitialized) {
+        await data_source_1.AppDataSource.initialize();
+    }
     const connectionRepo = data_source_1.AppDataSource.getRepository(node_connection_entity_1.NodeConnection);
     const nodeRepo = data_source_1.AppDataSource.getRepository(node_entity_1.Node);
     const filePath = path.join(__dirname, './node_connections_seed.json');

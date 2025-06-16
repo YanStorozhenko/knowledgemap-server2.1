@@ -52,6 +52,9 @@ let NodesController = class NodesController {
         }
         return this.nodesService.findOne(numericId);
     }
+    getGraphWithProgress(userUid) {
+        return this.nodesService.getGraphWithProgress(userUid);
+    }
 };
 exports.NodesController = NodesController;
 __decorate([
@@ -95,6 +98,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], NodesController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)('graph-with-progress/:userUid'),
+    __param(0, (0, common_1.Param)('userUid')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], NodesController.prototype, "getGraphWithProgress", null);
 exports.NodesController = NodesController = __decorate([
     (0, common_1.Controller)('nodes'),
     __metadata("design:paramtypes", [nodes_service_1.NodesService])

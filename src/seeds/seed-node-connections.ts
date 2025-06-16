@@ -9,6 +9,11 @@ function normalize(title: string): string {
 }
 
 export async function seedNodeConnections() {
+    // 🔹 1. Ініціалізація DataSource
+    if (!AppDataSource.isInitialized) {
+        await AppDataSource.initialize();
+    }
+
     const connectionRepo = AppDataSource.getRepository(NodeConnection);
     const nodeRepo = AppDataSource.getRepository(Node);
 
@@ -16,7 +21,6 @@ export async function seedNodeConnections() {
     const raw = fs.readFileSync(filePath, 'utf-8');
     const connections = JSON.parse(raw) as { from: string; to: string }[];
 
-    // Отримуємо наявні вузли
     const allNodes = await nodeRepo.find();
     const nodeMap = new Map(allNodes.map(node => [normalize(node.title), node]));
 
@@ -27,7 +31,6 @@ export async function seedNodeConnections() {
         let fromNode = nodeMap.get(normalize(from));
         let toNode = nodeMap.get(normalize(to));
 
-        // Якщо вузли відсутні — створити їх
         if (!fromNode) {
             fromNode = nodeRepo.create({ title: from });
             await nodeRepo.save(fromNode);
@@ -42,7 +45,6 @@ export async function seedNodeConnections() {
             createdNodes++;
         }
 
-        // Створити зв’язок, якщо його ще нема
         const exists = await connectionRepo.findOneBy({
             fromNodeId: fromNode.id,
             toNodeId: toNode.id,

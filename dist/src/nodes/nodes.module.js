@@ -14,12 +14,20 @@ const nodes_service_1 = require("./nodes.service");
 const node_entity_1 = require("./entities/node.entity");
 const topic_entity_1 = require("../topics/entities/topic.entity");
 const node_connection_entity_1 = require("../node-connections/entities/node-connection.entity");
+const user_topic_progress_entity_1 = require("../users/entities/user-topic-progress.entity");
 let NodesModule = class NodesModule {
 };
 exports.NodesModule = NodesModule;
 exports.NodesModule = NodesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([node_entity_1.Node, topic_entity_1.Topic, node_connection_entity_1.NodeConnection])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([
+                node_entity_1.Node,
+                topic_entity_1.Topic,
+                node_connection_entity_1.NodeConnection,
+                user_topic_progress_entity_1.UserTopicProgress,
+            ]),
+        ],
         controllers: [nodes_controller_1.NodesController],
         providers: [nodes_service_1.NodesService],
     })

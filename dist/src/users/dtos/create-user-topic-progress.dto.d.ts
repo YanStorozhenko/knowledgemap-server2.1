@@ -1,4 +1,4 @@
-export class CreateUserTopicProgressDto {
+export declare class CreateUserTopicProgressDto {
     userUid: string;
     topicId: number;
     status?: string;

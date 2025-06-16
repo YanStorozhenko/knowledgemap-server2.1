@@ -18,4 +18,13 @@ export declare class NodesController {
     }>;
     findAll(): Promise<import("./entities/node.entity").Node[]>;
     findOne(id: string): Promise<import("./entities/node.entity").Node>;
+    getGraphWithProgress(userUid: string): Promise<{
+        progressStatus: "completed" | "available" | "locked";
+        id: number;
+        title: string;
+        topicId: number;
+        x: number;
+        y: number;
+        color: string;
+    }[]>;
 }

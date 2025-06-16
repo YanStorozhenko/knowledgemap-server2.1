@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Node } from './entities/node.entity';
 import { CreateNodeDto } from './dtos/create-node.dto';
 
-
+import { UserTopicProgress } from '../users/entities/user-topic-progress.entity';
 import { NodeConnection } from '../node-connections/entities/node-connection.entity';
 
 
@@ -21,6 +21,8 @@ export class NodesService {
         @InjectRepository(Node)
         private readonly nodeRepo: Repository<Node>,
 
+        @InjectRepository(UserTopicProgress)
+        private progressRepo: Repository<UserTopicProgress>,
 
         @InjectRepository(NodeConnection)
         private readonly connectionRepo: Repository<NodeConnection>,
@@ -156,6 +158,57 @@ export class NodesService {
     }
 
 
+    async getGraphWithProgress(userUid: string) {
+        const nodes = await this.nodeRepo.find(); // всі вузли
+        const connections = await this.connectionRepo.find(); // звʼязки між вузлами
+
+        const progress = await this.progressRepo.find({
+            where: {userUid},
+        });
+
+        const completedTopicIds = new Set(
+            progress
+                .filter(p => p.status === 'completed' && p.topic)
+                .map(p => p.topic.id)
+        );
+
+        // Побудова графа суміжності
+        const adjacencyMap = new Map<number, number[]>();
+        for (const conn of connections) {
+            if (!adjacencyMap.has(conn.fromNodeId)) {
+                adjacencyMap.set(conn.fromNodeId, []);
+            }
+            adjacencyMap.get(conn.fromNodeId)!.push(conn.toNodeId);
+        }
+
+        // Які topicId доступні з вже завершених
+        const availableTopicIds = new Set<number>();
+        for (const node of nodes) {
+            if (completedTopicIds.has(node.topicId)) {
+                const neighbors = adjacencyMap.get(node.id) || [];
+                for (const neighborId of neighbors) {
+                    const target = nodes.find(n => n.id === neighborId);
+                    if (target) availableTopicIds.add(target.topicId);
+                }
+            }
+        }
+
+        // Додаємо статус до кожного вузла
+        return nodes.map(node => {
+            let status: 'completed' | 'available' | 'locked' = 'locked';
+
+            if (completedTopicIds.has(node.topicId)) {
+                status = 'completed';
+            } else if (availableTopicIds.has(node.topicId)) {
+                status = 'available';
+            }
+
+            return {
+                ...node,
+                progressStatus: status,
+            };
+        });
+    }
 
 
 }

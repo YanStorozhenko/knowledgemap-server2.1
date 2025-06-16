@@ -72,5 +72,11 @@ export class NodesController {
         return this.nodesService.findOne(numericId);
     }
 
+    @Get('graph-with-progress/:userUid')
+    getGraphWithProgress(@Param('userUid') userUid: string) {
+        return this.nodesService.getGraphWithProgress(userUid);
+    }
+
+
 
 }

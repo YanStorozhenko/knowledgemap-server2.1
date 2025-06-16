@@ -17,10 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const node_entity_1 = require("./entities/node.entity");
+const user_topic_progress_entity_1 = require("../users/entities/user-topic-progress.entity");
 const node_connection_entity_1 = require("../node-connections/entities/node-connection.entity");
 let NodesService = class NodesService {
-    constructor(nodeRepo, connectionRepo) {
+    constructor(nodeRepo, progressRepo, connectionRepo) {
         this.nodeRepo = nodeRepo;
+        this.progressRepo = progressRepo;
         this.connectionRepo = connectionRepo;
     }
     async findAll() {
@@ -119,13 +121,56 @@ let NodesService = class NodesService {
         }));
         return { nodes: rankedNodes, edges };
     }
+    async getGraphWithProgress(userUid) {
+        const nodes = await this.nodeRepo.find();
+        const connections = await this.connectionRepo.find();
+        const progress = await this.progressRepo.find({
+            where: { userUid },
+        });
+        const completedTopicIds = new Set(progress
+            .filter(p => p.status === 'completed' && p.topic)
+            .map(p => p.topic.id));
+        const adjacencyMap = new Map();
+        for (const conn of connections) {
+            if (!adjacencyMap.has(conn.fromNodeId)) {
+                adjacencyMap.set(conn.fromNodeId, []);
+            }
+            adjacencyMap.get(conn.fromNodeId).push(conn.toNodeId);
+        }
+        const availableTopicIds = new Set();
+        for (const node of nodes) {
+            if (completedTopicIds.has(node.topicId)) {
+                const neighbors = adjacencyMap.get(node.id) || [];
+                for (const neighborId of neighbors) {
+                    const target = nodes.find(n => n.id === neighborId);
+                    if (target)
+                        availableTopicIds.add(target.topicId);
+                }
+            }
+        }
+        return nodes.map(node => {
+            let status = 'locked';
+            if (completedTopicIds.has(node.topicId)) {
+                status = 'completed';
+            }
+            else if (availableTopicIds.has(node.topicId)) {
+                status = 'available';
+            }
+            return {
+                ...node,
+                progressStatus: status,
+            };
+        });
+    }
 };
 exports.NodesService = NodesService;
 exports.NodesService = NodesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(node_entity_1.Node)),
-    __param(1, (0, typeorm_1.InjectRepository)(node_connection_entity_1.NodeConnection)),
+    __param(1, (0, typeorm_1.InjectRepository)(user_topic_progress_entity_1.UserTopicProgress)),
+    __param(2, (0, typeorm_1.InjectRepository)(node_connection_entity_1.NodeConnection)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], NodesService);
 //# sourceMappingURL=nodes.service.js.map

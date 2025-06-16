@@ -1,9 +1,10 @@
-import { AppDataSource } from '../data-source';
-
-export async function CreateUserTopicProgressTable() {
-    const queryRunner = AppDataSource.createQueryRunner();
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateUserTopicProgressTable = CreateUserTopicProgressTable;
+const data_source_1 = require("../data-source");
+async function CreateUserTopicProgressTable() {
+    const queryRunner = data_source_1.AppDataSource.createQueryRunner();
     await queryRunner.connect();
-
     await queryRunner.query(`
         CREATE TABLE IF NOT EXISTS user_topic_progress (
                                                            id INT PRIMARY KEY AUTO_INCREMENT,
@@ -15,8 +16,7 @@ export async function CreateUserTopicProgressTable() {
             CONSTRAINT fk_topic FOREIGN KEY (topic_id) REFERENCES topics(id)
             )
     `);
-
-
     console.log('✅ Table user_topic_progress created');
     await queryRunner.release();
 }
+//# sourceMappingURL=create-user-topic-progress-table.js.map

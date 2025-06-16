@@ -1,91 +1,39 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
+const create_user_topic_progress_table_1 = require("./create-user-topic-progress-table");
 const data_source_1 = require("../data-source");
-const create_topics_table_1 = require("./create-topics-table");
-const create_nodes_table_1 = require("./create-nodes-table");
-const create_node_connections_table_1 = require("./create-node-connections-table");
-const seed_node_connections_1 = require("../seeds/seed-node-connections");
-const topic_entity_1 = require("../topics/entities/topic.entity");
-const node_entity_1 = require("../nodes/entities/node.entity");
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
+const { exec } = require('child_process');
+const path = require('path');
+const scripts = [
+    'src/migrations/create-user-topic-progress-table.ts',
+];
+async function runScript(scriptPath) {
+    return new Promise((resolve, reject) => {
+        const fullPath = path.resolve(scriptPath);
+        console.log(`▶️ Запуск: ${fullPath}`);
+        exec(`npx ts-node ${fullPath}`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`❌ Помилка у ${scriptPath}:\n`, stderr);
+                reject(error);
+                return;
+            }
+            console.log(stdout);
+            resolve();
+        });
+    });
+}
 async function initDb() {
     try {
+        for (const script of scripts) {
+            await runScript(script);
+        }
         await data_source_1.AppDataSource.initialize();
-        await (0, create_topics_table_1.CreateTopicsTable)();
-        await (0, create_nodes_table_1.CreateNodesTable)();
-        await (0, create_node_connections_table_1.CreateNodeConnectionsTable)();
-        const topicRepo = data_source_1.AppDataSource.getRepository(topic_entity_1.Topic);
-        const nodeRepo = data_source_1.AppDataSource.getRepository(node_entity_1.Node);
-        const filePath = path.join(__dirname, '../seeds/topics.json');
-        const raw = fs.readFileSync(filePath, 'utf-8');
-        const topicData = JSON.parse(raw);
-        let createdTopics = 0;
-        let createdNodes = 0;
-        for (const data of topicData) {
-            const exists = await topicRepo.findOneBy({ title: data.title });
-            if (!exists) {
-                const topic = topicRepo.create(data);
-                await topicRepo.save(topic);
-                createdTopics++;
-            }
-        }
-        const allTopics = await topicRepo.find();
-        for (const topic of allTopics) {
-            const existingNode = await nodeRepo.findOne({ where: { topicId: topic.id } });
-            if (!existingNode) {
-                const node = nodeRepo.create({
-                    title: topic.title,
-                    topic,
-                    x: undefined,
-                    y: undefined,
-                    color: undefined
-                });
-                await nodeRepo.save(node);
-                createdNodes++;
-            }
-        }
-        await (0, seed_node_connections_1.seedNodeConnections)();
-        console.log(`✅ Topics created: ${createdTopics}`);
-        console.log(`✅ Nodes created: ${createdNodes}`);
-        console.log('🎉 База успішно ініціалізована');
+        await (0, create_user_topic_progress_table_1.CreateUserTopicProgressTable)();
+        console.log('🎉 Уся база ініціалізована успішно');
         process.exit(0);
     }
     catch (e) {
-        console.error('❌ Init error:', e);
+        console.error('❌ Помилка при ініціалізації бази:', e);
         process.exit(1);
     }
 }

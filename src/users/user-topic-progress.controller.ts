@@ -13,10 +13,11 @@ export class UserTopicProgressController {
         return this.service.findAll();
     }
 
-    @Get('user/:userId')
-    getByUser(@Param('userId') userId: number) {
-        return this.service.findByUser(userId);
+    @Get('by-user/:userUid')
+    findByUser(@Param('userUid') userUid: string) {
+        return this.service.findByUser(userUid);
     }
+
 
     @Post()
     create(@Body() dto: CreateUserTopicProgressDto) {

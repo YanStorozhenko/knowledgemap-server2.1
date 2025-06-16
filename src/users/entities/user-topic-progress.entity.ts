@@ -1,20 +1,24 @@
-// src/users/entities/user-topic-progress.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Topic } from '../../topics/entities/topic.entity';
 
 @Entity('user_topic_progress')
 export class UserTopicProgress {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    userId: number;
+    @Column({ name: 'user_uid', type: 'varchar' })
+    userUid: string;
 
-    @Column()
-    topicId: number;
+    @ManyToOne(() => Topic)
+    @JoinColumn({ name: 'topic_id' })
+    topic: Topic;
 
-    @Column({ default: false })
-    isCompleted: boolean;
+    @Column({ default: 'not-started' })
+    status: string;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    updatedAt: Date;
+    @Column({ type: 'float', default: 0 })
+    progress: number;
+
+    @Column({ type: 'timestamp', nullable: true })
+    completed_at: Date | null;
 }

@@ -1,4 +1,8 @@
 // src/users/user-topic-progress.controller.ts
+
+
+import { In } from 'typeorm';
+
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { UserTopicProgressService } from './user-topic-progress.service';
 import { CreateUserTopicProgressDto } from './dtos/create-user-topic-progress.dto';
@@ -12,6 +16,9 @@ export class UserTopicProgressController {
     getAll() {
         return this.service.findAll();
     }
+
+
+
 
     @Get('by-user/:userUid')
     findByUser(@Param('userUid') userUid: string) {

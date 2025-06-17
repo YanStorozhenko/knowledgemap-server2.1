@@ -1,43 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserTopicProgress } from './entities/user-topic-progress.entity';
 import { CreateUserTopicProgressDto } from './dtos/create-user-topic-progress.dto';
 import { UpdateUserTopicProgressDto } from './dtos/update-user-topic-progress.dto';
-import { InjectRepository as InjectTopicRepo } from '@nestjs/typeorm';
-import { Topic } from '../topics/entities/topic.entity';
 
 @Injectable()
 export class UserTopicProgressService {
     constructor(
         @InjectRepository(UserTopicProgress)
         private repo: Repository<UserTopicProgress>,
-
-        @InjectRepository(Topic)
-        private topicRepo: Repository<Topic>,
     ) {}
 
     findAll() {
-        return this.repo.find({ relations: ['topic'] }); // 🔹 user більше не існує
+        return this.repo.find();
     }
 
     findByUser(userUid: string) {
         return this.repo.find({
             where: { userUid },
-            relations: ['topic'], // 🔹 тільки topic
+        });
+    }
+
+    async findProgressForUserByNodeIds(userUid: string, topicIds: number[]) {
+        return this.repo.find({
+            where: {
+                userUid,
+                topicId: In(topicIds),
+            },
         });
     }
 
     async create(data: CreateUserTopicProgressDto) {
-        const topic = await this.topicRepo.findOne({ where: { id: data.topicId } });
-        if (!topic) throw new Error('Topic not found');
-
         const entity = this.repo.create({
             userUid: data.userUid,
-            topic,
+            topicId: data.topicId,
             status: data.status ?? 'not-started',
             progress: data.progress ?? 0,
-            completed_at: data.completed_at ?? undefined,
+            completed_at: data.completed_at ?? null,
         });
 
         return this.repo.save(entity);
@@ -47,7 +47,7 @@ export class UserTopicProgressService {
         await this.repo.update(id, {
             ...data,
         });
-        return this.repo.findOne({ where: { id }, relations: ['topic'] }); // 🔹 user прибрано
+        return this.repo.findOne({ where: { id } });
     }
 
     async remove(id: number) {

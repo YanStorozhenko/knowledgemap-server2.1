@@ -26,8 +26,8 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => topic_entity_1.Topic),
     (0, typeorm_1.JoinColumn)({ name: 'topic_id' }),
-    __metadata("design:type", topic_entity_1.Topic)
-], UserTopicProgress.prototype, "topic", void 0);
+    __metadata("design:type", Number)
+], UserTopicProgress.prototype, "topicId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 'not-started' }),
     __metadata("design:type", String)

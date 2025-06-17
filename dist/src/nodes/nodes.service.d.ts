@@ -3,11 +3,6 @@ import { Node } from './entities/node.entity';
 import { CreateNodeDto } from './dtos/create-node.dto';
 import { UserTopicProgress } from '../users/entities/user-topic-progress.entity';
 import { NodeConnection } from '../node-connections/entities/node-connection.entity';
-type EdgeDto = {
-    from: number;
-    to: number;
-    label?: string;
-};
 export declare class NodesService {
     private readonly nodeRepo;
     private progressRepo;
@@ -18,20 +13,21 @@ export declare class NodesService {
     create(dto: CreateNodeDto): Promise<Node>;
     update(id: number, dto: CreateNodeDto): Promise<Node>;
     remove(id: number): Promise<void>;
-    getGraph(): Promise<{
-        nodes: (Node & {
+    getGraph(userUid: string): Promise<{
+        nodes: {
+            id: number;
+            title: string;
+            topicId: number;
+            x: number;
+            y: number;
             level: number;
-        })[];
-        edges: EdgeDto[];
+            progress: number;
+            status: "completed" | "available" | "locked";
+        }[];
+        edges: {
+            from: number;
+            to: number;
+            label: string;
+        }[];
     }>;
-    getGraphWithProgress(userUid: string): Promise<{
-        progressStatus: "completed" | "available" | "locked";
-        id: number;
-        title: string;
-        topicId: number;
-        x: number;
-        y: number;
-        color: string;
-    }[]>;
 }
-export {};

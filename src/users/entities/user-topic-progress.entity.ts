@@ -11,7 +11,7 @@ export class UserTopicProgress {
 
     @ManyToOne(() => Topic)
     @JoinColumn({ name: 'topic_id' })
-    topic: Topic;
+    topicId: number;
 
     @Column({ default: 'not-started' })
     status: string;

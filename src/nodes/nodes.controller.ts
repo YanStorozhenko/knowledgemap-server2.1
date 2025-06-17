@@ -6,7 +6,7 @@ import {
     Delete,
     Param,
     Body,
-    UseGuards, BadRequestException,
+    UseGuards, BadRequestException, Req,
 } from '@nestjs/common';
 import { NodesService } from './nodes.service';
 import { CreateNodeDto } from './dtos/create-node.dto';
@@ -42,17 +42,16 @@ export class NodesController {
 
 
     @Get('graph')
-    async getGraph() {
-        console.log('➡️ Вхід в getGraph');
+    @UseGuards(FirebaseAuthGuard)
+    async getGraph(@Req() req: any) {
+        const userUid = req.user?.uid;
+        console.log('➡️ Вхід в getGraph з userUid =', userUid);
 
         try {
-            console.log("try { ---------------");
-            return await this.nodesService.getGraph();
+            return await this.nodesService.getGraph(userUid);
         } catch (error) {
-
-            console.log("catch (error) { ---------------");
             console.warn('⚠️ Помилка при побудові графа:', error);
-            return { nodes: [], edges: [] }; // або null
+            return { nodes: [], edges: [] };
         }
     }
 
@@ -72,10 +71,10 @@ export class NodesController {
         return this.nodesService.findOne(numericId);
     }
 
-    @Get('graph-with-progress/:userUid')
-    getGraphWithProgress(@Param('userUid') userUid: string) {
-        return this.nodesService.getGraphWithProgress(userUid);
-    }
+    // @Get('graph-with-progress/:userUid')
+    // getGraphWithProgress(@Param('userUid') userUid: string) {
+    //     return this.nodesService.getGraphWithProgress(userUid);
+    // }
 
 
 

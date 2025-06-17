@@ -17,31 +17,33 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("typeorm");
 const typeorm_2 = require("@nestjs/typeorm");
 const user_topic_progress_entity_1 = require("./entities/user-topic-progress.entity");
-const topic_entity_1 = require("../topics/entities/topic.entity");
 let UserTopicProgressService = class UserTopicProgressService {
-    constructor(repo, topicRepo) {
+    constructor(repo) {
         this.repo = repo;
-        this.topicRepo = topicRepo;
     }
     findAll() {
-        return this.repo.find({ relations: ['topic'] });
+        return this.repo.find();
     }
     findByUser(userUid) {
         return this.repo.find({
             where: { userUid },
-            relations: ['topic'],
+        });
+    }
+    async findProgressForUserByNodeIds(userUid, topicIds) {
+        return this.repo.find({
+            where: {
+                userUid,
+                topicId: (0, typeorm_1.In)(topicIds),
+            },
         });
     }
     async create(data) {
-        const topic = await this.topicRepo.findOne({ where: { id: data.topicId } });
-        if (!topic)
-            throw new Error('Topic not found');
         const entity = this.repo.create({
             userUid: data.userUid,
-            topic,
+            topicId: data.topicId,
             status: data.status ?? 'not-started',
             progress: data.progress ?? 0,
-            completed_at: data.completed_at ?? undefined,
+            completed_at: data.completed_at ?? null,
         });
         return this.repo.save(entity);
     }
@@ -49,7 +51,7 @@ let UserTopicProgressService = class UserTopicProgressService {
         await this.repo.update(id, {
             ...data,
         });
-        return this.repo.findOne({ where: { id }, relations: ['topic'] });
+        return this.repo.findOne({ where: { id } });
     }
     async remove(id) {
         await this.repo.delete(id);
@@ -60,8 +62,6 @@ exports.UserTopicProgressService = UserTopicProgressService;
 exports.UserTopicProgressService = UserTopicProgressService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_2.InjectRepository)(user_topic_progress_entity_1.UserTopicProgress)),
-    __param(1, (0, typeorm_2.InjectRepository)(topic_entity_1.Topic)),
-    __metadata("design:paramtypes", [typeorm_1.Repository,
-        typeorm_1.Repository])
+    __metadata("design:paramtypes", [typeorm_1.Repository])
 ], UserTopicProgressService);
 //# sourceMappingURL=user-topic-progress.service.js.map

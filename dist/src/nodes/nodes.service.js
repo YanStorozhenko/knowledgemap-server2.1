@@ -47,40 +47,37 @@ let NodesService = class NodesService {
         const node = await this.findOne(id);
         await this.nodeRepo.remove(node);
     }
-    async getGraph() {
-        const allNodes = await this.nodeRepo.find();
-        const allConnections = await this.connectionRepo.find();
-        const usedNodeIds = new Set();
-        for (const conn of allConnections) {
-            if (Number.isInteger(conn.fromNodeId) &&
-                Number.isInteger(conn.toNodeId)) {
-                usedNodeIds.add(conn.fromNodeId);
-                usedNodeIds.add(conn.toNodeId);
+    async getGraph(userUid) {
+        const nodes = await this.nodeRepo.find();
+        const connections = await this.connectionRepo.find();
+        const progresses = await this.progressRepo.find({
+            where: { userUid },
+        });
+        const progressMap = new Map();
+        const completedTopicIds = new Set();
+        for (const prog of progresses) {
+            progressMap.set(prog.topicId, prog);
+            if (prog.status === 'completed') {
+                completedTopicIds.add(prog.topicId);
             }
         }
-        const nodes = allNodes.filter(n => Number.isInteger(n.id) && usedNodeIds.has(n.id));
-        const validNodeIds = new Set(nodes.map(n => n.id));
+        const graphMap = new Map();
         const inDegree = new Map();
-        const graph = new Map();
+        const parentMap = new Map();
         for (const node of nodes) {
+            graphMap.set(node.id, []);
             inDegree.set(node.id, 0);
-            graph.set(node.id, []);
         }
-        for (const conn of allConnections) {
-            const { fromNodeId, toNodeId } = conn;
-            if (!Number.isInteger(fromNodeId) ||
-                !Number.isInteger(toNodeId) ||
-                !validNodeIds.has(fromNodeId) ||
-                !validNodeIds.has(toNodeId)) {
-                console.warn(`⚠️ Пропущено з’єднання: ${fromNodeId} → ${toNodeId}`);
-                continue;
+        for (const conn of connections) {
+            graphMap.get(conn.fromNodeId).push(conn.toNodeId);
+            inDegree.set(conn.toNodeId, (inDegree.get(conn.toNodeId) || 0) + 1);
+            if (!parentMap.has(conn.toNodeId)) {
+                parentMap.set(conn.toNodeId, []);
             }
-            graph.get(fromNodeId).push(toNodeId);
-            inDegree.set(toNodeId, (inDegree.get(toNodeId) || 0) + 1);
+            parentMap.get(conn.toNodeId).push(conn.fromNodeId);
         }
         const queue = [];
         const levels = new Map();
-        let processedNodes = 0;
         for (const [id, deg] of inDegree.entries()) {
             if (deg === 0) {
                 queue.push({ id, level: 0 });
@@ -89,78 +86,57 @@ let NodesService = class NodesService {
         }
         while (queue.length > 0) {
             const { id, level } = queue.shift();
-            processedNodes++;
-            for (const next of graph.get(id)) {
-                const newInDegree = inDegree.get(next) - 1;
-                inDegree.set(next, newInDegree);
-                if (newInDegree === 0) {
-                    queue.push({ id: next, level: level + 1 });
-                    levels.set(next, level + 1);
+            for (const next of graphMap.get(id)) {
+                const newIn = inDegree.get(next) - 1;
+                inDegree.set(next, newIn);
+                const existingLevel = levels.get(next) ?? 0;
+                levels.set(next, Math.max(existingLevel, level + 1));
+                if (newIn === 0) {
+                    queue.push({ id: next, level: levels.get(next) });
                 }
             }
-        }
-        if (processedNodes < nodes.length) {
-            const unprocessed = nodes.filter(n => !levels.has(n.id));
-            console.warn('⚠️ Деякі вузли не оброблені (можливо цикл):', unprocessed.map(n => n.id));
-        }
-        const rankedNodes = nodes
-            .filter(n => levels.has(n.id))
-            .map(n => ({
-            ...n,
-            level: levels.get(n.id),
-        }));
-        const edges = allConnections
-            .filter(c => Number.isInteger(c.fromNodeId) &&
-            Number.isInteger(c.toNodeId) &&
-            validNodeIds.has(c.fromNodeId) &&
-            validNodeIds.has(c.toNodeId))
-            .map(c => ({
-            from: c.fromNodeId,
-            to: c.toNodeId,
-            label: c.type ?? 'unknown',
-        }));
-        return { nodes: rankedNodes, edges };
-    }
-    async getGraphWithProgress(userUid) {
-        const nodes = await this.nodeRepo.find();
-        const connections = await this.connectionRepo.find();
-        const progress = await this.progressRepo.find({
-            where: { userUid },
-        });
-        const completedTopicIds = new Set(progress
-            .filter(p => p.status === 'completed' && p.topic)
-            .map(p => p.topic.id));
-        const adjacencyMap = new Map();
-        for (const conn of connections) {
-            if (!adjacencyMap.has(conn.fromNodeId)) {
-                adjacencyMap.set(conn.fromNodeId, []);
-            }
-            adjacencyMap.get(conn.fromNodeId).push(conn.toNodeId);
         }
         const availableTopicIds = new Set();
         for (const node of nodes) {
-            if (completedTopicIds.has(node.topicId)) {
-                const neighbors = adjacencyMap.get(node.id) || [];
-                for (const neighborId of neighbors) {
-                    const target = nodes.find(n => n.id === neighborId);
-                    if (target)
-                        availableTopicIds.add(target.topicId);
-                }
+            const parents = parentMap.get(node.id) || [];
+            const isCompleted = completedTopicIds.has(node.topicId);
+            const hasNoParents = parents.length === 0;
+            const allParentsCompleted = parents.every(parentId => {
+                const parentNode = nodes.find(n => n.id === parentId);
+                return parentNode && completedTopicIds.has(parentNode.topicId);
+            });
+            if (!isCompleted && (hasNoParents || allParentsCompleted)) {
+                availableTopicIds.add(node.topicId);
             }
         }
-        return nodes.map(node => {
-            let status = 'locked';
-            if (completedTopicIds.has(node.topicId)) {
-                status = 'completed';
-            }
-            else if (availableTopicIds.has(node.topicId)) {
-                status = 'available';
-            }
-            return {
-                ...node,
-                progressStatus: status,
-            };
-        });
+        return {
+            nodes: nodes.map(node => {
+                const progress = progressMap.get(node.topicId);
+                const level = levels.get(node.id) ?? 0;
+                let progressStatus = 'locked';
+                if (completedTopicIds.has(node.topicId)) {
+                    progressStatus = 'completed';
+                }
+                else if (availableTopicIds.has(node.topicId)) {
+                    progressStatus = 'available';
+                }
+                return {
+                    id: node.id,
+                    title: node.title,
+                    topicId: node.topicId,
+                    x: node.x,
+                    y: node.y,
+                    level,
+                    progress: progress?.progress ?? 0,
+                    status: progressStatus,
+                };
+            }),
+            edges: connections.map(c => ({
+                from: c.fromNodeId,
+                to: c.toNodeId,
+                label: c.type ?? 'unknown',
+            })),
+        };
     }
 };
 exports.NodesService = NodesService;

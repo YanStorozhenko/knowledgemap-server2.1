@@ -18,7 +18,7 @@ const users_module_1 = require("./users/users.module");
 const topics_module_1 = require("./topics/topics.module");
 const nodes_module_1 = require("./nodes/nodes.module");
 const node_connections_module_1 = require("./node-connections/node-connections.module");
-const roles_guard_1 = require("./auth/roles.guard");
+const auth_roles_guard_1 = require("./auth/auth-roles.guard");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -60,7 +60,7 @@ exports.AppModule = AppModule = __decorate([
             app_service_1.AppService,
             {
                 provide: core_1.APP_GUARD,
-                useClass: roles_guard_1.RolesGuard,
+                useClass: auth_roles_guard_1.AuthRolesGuard,
             },
         ],
     })

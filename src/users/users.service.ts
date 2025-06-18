@@ -35,6 +35,9 @@ export class UsersService {
      * 🔹 Отримати всіх користувачів.
      */
     async findAll(): Promise<User[]> {
+
+        console.log("FIND ALL");
+
         return await this.usersRepository.find();
     }
 

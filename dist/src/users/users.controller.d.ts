@@ -5,7 +5,7 @@ import { Request } from 'express';
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
-    getUsers(req: Request): Promise<import("./entities/user.entity").User[]>;
+    getUsers(): Promise<import("./entities/user.entity").User[]>;
     create(createUserDto: CreateUserDto): Promise<import("./entities/user.entity").User>;
     saveAfterGoogleLogin(body: {
         firebase_uid: string;

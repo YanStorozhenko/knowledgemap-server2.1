@@ -12,13 +12,16 @@ const typeorm_1 = require("@nestjs/typeorm");
 const node_connections_service_1 = require("./node-connections.service");
 const node_connections_controller_1 = require("./node-connections.controller");
 const node_connection_entity_1 = require("./entities/node-connection.entity");
+const auth_module_1 = require("../auth/auth.module");
+const firebase_auth_guard_1 = require("../auth/firebase-auth.guard");
+const users_module_1 = require("../users/users.module");
 let NodeConnectionsModule = class NodeConnectionsModule {
 };
 exports.NodeConnectionsModule = NodeConnectionsModule;
 exports.NodeConnectionsModule = NodeConnectionsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([node_connection_entity_1.NodeConnection])],
-        providers: [node_connections_service_1.NodeConnectionsService],
+        imports: [typeorm_1.TypeOrmModule.forFeature([node_connection_entity_1.NodeConnection]), auth_module_1.AuthModule, users_module_1.UsersModule,],
+        providers: [node_connections_service_1.NodeConnectionsService, firebase_auth_guard_1.FirebaseAuthGuard],
         controllers: [node_connections_controller_1.NodeConnectionsController],
     })
 ], NodeConnectionsModule);

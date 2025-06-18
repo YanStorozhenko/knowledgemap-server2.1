@@ -56,74 +56,74 @@ let NodesService = class NodesService {
         const progressMap = new Map();
         const completedTopicIds = new Set();
         for (const prog of progresses) {
-            progressMap.set(prog.topicId, prog);
+            const topicId = Number(prog.topicId);
+            progressMap.set(topicId, prog);
             if (prog.status === 'completed') {
-                completedTopicIds.add(prog.topicId);
+                completedTopicIds.add(topicId);
             }
         }
-        const graphMap = new Map();
-        const inDegree = new Map();
         const parentMap = new Map();
-        for (const node of nodes) {
-            graphMap.set(node.id, []);
-            inDegree.set(node.id, 0);
-        }
         for (const conn of connections) {
-            graphMap.get(conn.fromNodeId).push(conn.toNodeId);
-            inDegree.set(conn.toNodeId, (inDegree.get(conn.toNodeId) || 0) + 1);
             if (!parentMap.has(conn.toNodeId)) {
                 parentMap.set(conn.toNodeId, []);
             }
             parentMap.get(conn.toNodeId).push(conn.fromNodeId);
         }
-        const queue = [];
         const levels = new Map();
-        for (const [id, deg] of inDegree.entries()) {
-            if (deg === 0) {
-                queue.push({ id, level: 0 });
-                levels.set(id, 0);
+        const visited = new Set();
+        const queue = [];
+        for (const node of nodes) {
+            const parents = parentMap.get(node.id) || [];
+            if (parents.length === 0) {
+                levels.set(node.id, 0);
+                queue.push(node.id);
+                visited.add(node.id);
             }
         }
         while (queue.length > 0) {
-            const { id, level } = queue.shift();
-            for (const next of graphMap.get(id)) {
-                const newIn = inDegree.get(next) - 1;
-                inDegree.set(next, newIn);
-                const existingLevel = levels.get(next) ?? 0;
-                levels.set(next, Math.max(existingLevel, level + 1));
-                if (newIn === 0) {
-                    queue.push({ id: next, level: levels.get(next) });
+            const currentId = queue.shift();
+            const currentLevel = levels.get(currentId);
+            for (const conn of connections) {
+                if (conn.fromNodeId === currentId) {
+                    const childId = conn.toNodeId;
+                    const prevLevel = levels.get(childId) ?? 0;
+                    levels.set(childId, Math.max(prevLevel, currentLevel + 1));
+                    if (!visited.has(childId)) {
+                        queue.push(childId);
+                        visited.add(childId);
+                    }
                 }
             }
         }
         const availableTopicIds = new Set();
         for (const node of nodes) {
             const parents = parentMap.get(node.id) || [];
-            const isCompleted = completedTopicIds.has(node.topicId);
+            const isCompleted = completedTopicIds.has(Number(node.topicId));
             const hasNoParents = parents.length === 0;
             const allParentsCompleted = parents.every(parentId => {
                 const parentNode = nodes.find(n => n.id === parentId);
-                return parentNode && completedTopicIds.has(parentNode.topicId);
+                return parentNode && completedTopicIds.has(Number(parentNode.topicId));
             });
             if (!isCompleted && (hasNoParents || allParentsCompleted)) {
-                availableTopicIds.add(node.topicId);
+                availableTopicIds.add(Number(node.topicId));
             }
         }
         return {
             nodes: nodes.map(node => {
-                const progress = progressMap.get(node.topicId);
+                const topicId = Number(node.topicId);
+                const progress = progressMap.get(topicId);
                 const level = levels.get(node.id) ?? 0;
                 let progressStatus = 'locked';
-                if (completedTopicIds.has(node.topicId)) {
+                if (completedTopicIds.has(topicId)) {
                     progressStatus = 'completed';
                 }
-                else if (availableTopicIds.has(node.topicId)) {
+                else if (availableTopicIds.has(topicId)) {
                     progressStatus = 'available';
                 }
                 return {
                     id: node.id,
                     title: node.title,
-                    topicId: node.topicId,
+                    topicId: topicId,
                     x: node.x,
                     y: node.y,
                     level,

@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserTopicProgress = void 0;
 const typeorm_1 = require("typeorm");
-const topic_entity_1 = require("../../topics/entities/topic.entity");
 let UserTopicProgress = class UserTopicProgress {
 };
 exports.UserTopicProgress = UserTopicProgress;
@@ -24,8 +23,7 @@ __decorate([
     __metadata("design:type", String)
 ], UserTopicProgress.prototype, "userUid", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => topic_entity_1.Topic),
-    (0, typeorm_1.JoinColumn)({ name: 'topic_id' }),
+    (0, typeorm_1.Column)({ name: 'topic_id', type: 'int' }),
     __metadata("design:type", Number)
 ], UserTopicProgress.prototype, "topicId", void 0);
 __decorate([

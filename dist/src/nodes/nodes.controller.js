@@ -16,7 +16,6 @@ exports.NodesController = void 0;
 const common_1 = require("@nestjs/common");
 const nodes_service_1 = require("./nodes.service");
 const create_node_dto_1 = require("./dtos/create-node.dto");
-const firebase_auth_guard_1 = require("../auth/firebase-auth.guard");
 console.log('✅ NodesController підключено');
 let NodesController = class NodesController {
     constructor(nodesService) {
@@ -78,7 +77,6 @@ __decorate([
 ], NodesController.prototype, "remove", null);
 __decorate([
     (0, common_1.Get)('graph'),
-    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

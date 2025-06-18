@@ -9,8 +9,7 @@ export class UserTopicProgress {
     @Column({ name: 'user_uid', type: 'varchar' })
     userUid: string;
 
-    @ManyToOne(() => Topic)
-    @JoinColumn({ name: 'topic_id' })
+    @Column({ name: 'topic_id', type: 'int' })
     topicId: number;
 
     @Column({ default: 'not-started' })

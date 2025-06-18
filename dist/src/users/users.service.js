@@ -32,6 +32,7 @@ let UsersService = class UsersService {
         return await this.usersRepository.save(newUser);
     }
     async findAll() {
+        console.log("FIND ALL");
         return await this.usersRepository.find();
     }
     async findByEmail(email) {

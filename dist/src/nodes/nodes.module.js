@@ -15,6 +15,9 @@ const node_entity_1 = require("./entities/node.entity");
 const topic_entity_1 = require("../topics/entities/topic.entity");
 const node_connection_entity_1 = require("../node-connections/entities/node-connection.entity");
 const user_topic_progress_entity_1 = require("../users/entities/user-topic-progress.entity");
+const users_module_1 = require("../users/users.module");
+const firebase_auth_guard_1 = require("../auth/firebase-auth.guard");
+const auth_module_1 = require("../auth/auth.module");
 let NodesModule = class NodesModule {
 };
 exports.NodesModule = NodesModule;
@@ -27,9 +30,11 @@ exports.NodesModule = NodesModule = __decorate([
                 node_connection_entity_1.NodeConnection,
                 user_topic_progress_entity_1.UserTopicProgress,
             ]),
+            users_module_1.UsersModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [nodes_controller_1.NodesController],
-        providers: [nodes_service_1.NodesService],
+        providers: [nodes_service_1.NodesService, firebase_auth_guard_1.FirebaseAuthGuard],
     })
 ], NodesModule);
 //# sourceMappingURL=nodes.module.js.map

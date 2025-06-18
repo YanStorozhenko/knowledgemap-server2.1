@@ -14,8 +14,7 @@ export class NodeConnectionsService {
     async findAll(): Promise<any[]> {
         const raw = await this.repo.find();
 
-        console.log(raw);
-
+        // console.log(raw);
 
         return raw.map(({ id, fromNodeId, toNodeId, type }) => ({
             id,

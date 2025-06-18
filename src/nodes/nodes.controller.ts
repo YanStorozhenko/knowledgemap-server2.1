@@ -42,7 +42,7 @@ export class NodesController {
 
 
     @Get('graph')
-    @UseGuards(FirebaseAuthGuard)
+    // @UseGuards(FirebaseAuthGuard)
     async getGraph(@Req() req: any) {
         const userUid = req.user?.uid;
         console.log('➡️ Вхід в getGraph з userUid =', userUid);

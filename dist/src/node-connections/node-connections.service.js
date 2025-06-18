@@ -23,7 +23,6 @@ let NodeConnectionsService = class NodeConnectionsService {
     }
     async findAll() {
         const raw = await this.repo.find();
-        console.log(raw);
         return raw.map(({ id, fromNodeId, toNodeId, type }) => ({
             id,
             fromNodeId,

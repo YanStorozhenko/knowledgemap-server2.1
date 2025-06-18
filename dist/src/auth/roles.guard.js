@@ -9,11 +9,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RolesGuard = void 0;
+exports.RolesGuardBAC = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const roles_decorator_1 = require("./roles.decorator");
-let RolesGuard = class RolesGuard {
+let RolesGuardBAC = class RolesGuardBAC {
     constructor(reflector) {
         this.reflector = reflector;
     }
@@ -26,15 +26,19 @@ let RolesGuard = class RolesGuard {
             return true;
         const { user } = context.switchToHttp().getRequest();
         const userRole = user?.role;
+        console.log(" user.role.ADMIN");
+        console.log(requiredRoles);
+        console.log(" userRole");
+        console.log(userRole);
         if (!userRole || !requiredRoles.includes(userRole)) {
             throw new common_1.ForbiddenException('Недостатньо прав доступу');
         }
         return true;
     }
 };
-exports.RolesGuard = RolesGuard;
-exports.RolesGuard = RolesGuard = __decorate([
+exports.RolesGuardBAC = RolesGuardBAC;
+exports.RolesGuardBAC = RolesGuardBAC = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [core_1.Reflector])
-], RolesGuard);
+], RolesGuardBAC);
 //# sourceMappingURL=roles.guard.js.map

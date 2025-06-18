@@ -13,7 +13,7 @@ import {
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { RolesGuard } from '../auth/roles.guard';
+// import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from './entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -25,12 +25,16 @@ import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    @UseGuards(FirebaseAuthGuard, RolesGuard)
+
+
+
     @Roles(UserRole.ADMIN)
     @Get()
-    getUsers(@Req() req: Request) {
+    getUsers() {
         return this.usersService.findAll();
     }
+
+
 
     // @UseGuards(FirebaseAuthGuard)
     // @Get(':id')
@@ -51,7 +55,7 @@ export class UsersController {
     //     return this.usersService.remove(+id);
     // }
 
-    @UseGuards(FirebaseAuthGuard, RolesGuard)
+    @UseGuards(FirebaseAuthGuard)
     @Roles(UserRole.ADMIN)
     @Post()
     create(@Body() createUserDto: CreateUserDto) {

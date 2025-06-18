@@ -12,12 +12,15 @@ import { UserTopicProgressController } from './user-topic-progress.controller';
 
 import { Topic } from '../topics/entities/topic.entity';
 import { TopicsModule } from '../topics/topics.module';
+// import {FirebaseAuthGuard} from "../auth/firebase-auth.guard";
+// import {AuthModule} from "../auth/auth.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserTopicProgress, Topic]),
-    JwtModule,
+    //JwtModule,
     TopicsModule,
+    // AuthModule,
   ],
   providers: [UsersService, UserTopicProgressService],
   controllers: [UsersController, UserTopicProgressController],

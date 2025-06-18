@@ -11,8 +11,9 @@ import { UsersModule } from './users/users.module';
 import { TopicsModule } from './topics/topics.module';
 import { NodesModule } from './nodes/nodes.module';
 import { NodeConnectionsModule } from './node-connections/node-connections.module';
+import {AuthRolesGuard} from "./auth/auth-roles.guard";
 
-import { RolesGuard } from './auth/roles.guard';
+// import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
@@ -52,7 +53,7 @@ import { RolesGuard } from './auth/roles.guard';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: AuthRolesGuard,
     },
   ],
 })

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
+import { IS_PUBLIC_KEY } from './public.decorator';
 import { admin } from '../firebase-admin';
 import { UsersService } from '../users/users.service';
 
@@ -18,6 +19,12 @@ export class AuthRolesGuard implements CanActivate {
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (isPublic) return true;
+
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
 
@@ -47,5 +54,4 @@ export class AuthRolesGuard implements CanActivate {
 
         return true;
     }
-
 }

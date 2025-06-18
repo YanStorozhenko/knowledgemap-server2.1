@@ -1,19 +1,36 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
+import { Reflector } from '@nestjs/core';
+
 import { admin } from '../firebase-admin';
 import { UsersService } from '../users/users.service';
+import {IS_PUBLIC_KEY} from "./public.decorator";
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
-    constructor(private readonly usersService: UsersService) {}
+
+    constructor(
+        private readonly reflector: Reflector,
+        private readonly usersService: UsersService,
+    ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest<Request>();
         const authHeader = req.headers.authorization;
 
+        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (isPublic) return true;
+
+
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             throw new UnauthorizedException('Missing token');
         }
+
+
+
 
         const token = authHeader.split(' ')[1];
         try {
@@ -26,7 +43,7 @@ export class FirebaseAuthGuard implements CanActivate {
 
             req.user = {
                 uid: decodedToken.uid,
-                role: user.role, // 👈 ОБОВʼЯЗКОВО
+                role: user.role,
             };
 
             console.log('✅ FirebaseAuthGuard set req.user:', req.user);

@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const topics_service_1 = require("./topics.service");
 const create_topic_dto_1 = require("./dtos/create-topic.dto");
 const update_topic_dto_1 = require("./dtos/update-topic.dto");
+const public_decorator_1 = require("../auth/public.decorator");
 let TopicsController = class TopicsController {
     constructor(topicsService) {
         this.topicsService = topicsService;
@@ -39,6 +40,7 @@ let TopicsController = class TopicsController {
 };
 exports.TopicsController = TopicsController;
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

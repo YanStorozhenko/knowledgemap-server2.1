@@ -13,6 +13,7 @@ exports.AuthRolesGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const roles_decorator_1 = require("./roles.decorator");
+const public_decorator_1 = require("./public.decorator");
 const firebase_admin_1 = require("../firebase-admin");
 const users_service_1 = require("../users/users.service");
 let AuthRolesGuard = class AuthRolesGuard {
@@ -21,6 +22,12 @@ let AuthRolesGuard = class AuthRolesGuard {
         this.usersService = usersService;
     }
     async canActivate(context) {
+        const isPublic = this.reflector.getAllAndOverride(public_decorator_1.IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (isPublic)
+            return true;
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
         if (!authHeader?.startsWith('Bearer ')) {

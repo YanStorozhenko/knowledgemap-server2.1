@@ -2,11 +2,13 @@ import { Controller, Get, Param, Post, Body, Put, Delete } from '@nestjs/common'
 import { TopicsService } from './topics.service';
 import { CreateTopicDto } from './dtos/create-topic.dto';
 import { UpdateTopicDto } from './dtos/update-topic.dto';
+import { Public } from '../auth/public.decorator';
 
 @Controller('topics')
 export class TopicsController {
     constructor(private readonly topicsService: TopicsService) {}
 
+    @Public()
     @Get()
     findAll() {
         return this.topicsService.findAll();

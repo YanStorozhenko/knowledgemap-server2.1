@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 
-import { admin } from '../firebase-admin';
+import { admin } from '../config/firebase-admin';
 import { UsersService } from '../users/users.service';
 import {IS_PUBLIC_KEY} from "./public.decorator";
 

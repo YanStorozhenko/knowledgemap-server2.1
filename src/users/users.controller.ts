@@ -17,7 +17,7 @@ import { UserRole } from './entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 // import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
-import {admin} from "../firebase-admin";
+import {admin} from "../config/firebase-admin";
 import {Public} from "../auth/public.decorator";
 
 @ApiBearerAuth('access-token')

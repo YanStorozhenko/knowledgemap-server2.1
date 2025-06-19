@@ -8,7 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
-import { admin } from '../firebase-admin';
+import { admin } from '../config/firebase-admin';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/entities/user.entity';
 

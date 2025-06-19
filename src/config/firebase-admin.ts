@@ -1,6 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 
+
+
+
 let serviceAccount: any;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {

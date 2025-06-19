@@ -6,12 +6,12 @@ import {
     Delete,
     Param,
     Body,
-    UseGuards, BadRequestException, Req,
+    BadRequestException, Req,
 } from '@nestjs/common';
 import { NodesService } from './nodes.service';
 import { CreateNodeDto } from './dtos/create-node.dto';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
+// import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+// import { ApiBearerAuth } from '@nestjs/swagger';
 
 console.log('✅ NodesController підключено');
 

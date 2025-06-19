@@ -17,8 +17,8 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const users_service_1 = require("../users/users.service");
 const create_user_dto_1 = require("../users/dtos/create-user.dto");
-const firebase_auth_guard_1 = require("./firebase-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
+console.log('✅ AuthController підключено');
 let AuthController = class AuthController {
     constructor(authService, usersService) {
         this.authService = authService;
@@ -28,6 +28,8 @@ let AuthController = class AuthController {
         return this.authService.createAdmin();
     }
     getProtected(req) {
+        console.log('🔥 INSIDE getProtected()', req.user);
+        console.log('protected   ', req.user);
         return {
             message: '✅ Access granted (Firebase Token Valid)',
             user: req.user,
@@ -49,7 +51,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerAdmin", null);
 __decorate([
-    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
     (0, common_1.Get)('protected'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),

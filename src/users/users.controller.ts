@@ -7,18 +7,18 @@ import {
     Patch,
     Req,
     Body,
-    UseGuards,
-    Post,
+    Post, UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dtos/update-user.dto';
+// import { UpdateUserDto } from './dtos/update-user.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
-// import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from './entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+// import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import {admin} from "../firebase-admin";
+import {Public} from "../auth/public.decorator";
 
 @ApiBearerAuth('access-token')
 @Controller('users')
@@ -26,13 +26,6 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
 
-
-
-    @Roles(UserRole.ADMIN)
-    @Get()
-    getUsers() {
-        return this.usersService.findAll();
-    }
 
 
 
@@ -55,42 +48,75 @@ export class UsersController {
     //     return this.usersService.remove(+id);
     // }
 
-    @UseGuards(FirebaseAuthGuard)
+
+
+    @Public()
+    @Post('save')
+    async saveAfterGoogleLogin(
+        @Req() req: Request,
+        @Body() body: { email: string; name: string; avatarUrl?: string }
+    ) {
+
+
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) throw new UnauthorizedException('No token provided');
+
+
+
+        const decoded = await admin.auth().verifyIdToken(token);
+        const firebaseUid = decoded.uid;
+
+        const existingUser = await this.usersService.findByFirebaseUid(firebaseUid);
+
+            console.log("existingUser" + existingUser);
+        if (existingUser) return existingUser;
+
+        return this.usersService.create({
+            firebase_uid: firebaseUid,
+            email: body.email,
+            name: body.name,
+            avatarUrl: body.avatarUrl,
+            role: UserRole.STUDENT,
+        });
+    }
+
+    // @UseGuards(FirebaseAuthGuard)
+
+    @Get('me')
+    async getMe(@Req() req: Request) {
+        const firebaseUid = (req.user as any).uid;
+        const user = await this.usersService.findByFirebaseUid(firebaseUid);
+
+        if (!user) {
+            throw new UnauthorizedException('Користувача не знайдено');
+        }
+
+        return {
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        };
+
+    }
+
+
+    // @UseGuards(FirebaseAuthGuard)
     @Roles(UserRole.ADMIN)
     @Post()
     create(@Body() createUserDto: CreateUserDto) {
         return this.usersService.create(createUserDto);
     }
 
-    @Post('save')
-    async saveAfterGoogleLogin(@Body() body: { firebase_uid: string, email: string, name: string, avatarUrl?: string }) {
-        const { firebase_uid, email, name, avatarUrl } = body;
-
-        const existingUser = await this.usersService.findByFirebaseUid(firebase_uid);
-        if (existingUser) return existingUser;
-
-        return this.usersService.create({
-            firebase_uid,
-            email,
-            name,
-            avatarUrl,
-            role: UserRole.STUDENT,
-        });
+    @Roles(UserRole.ADMIN)
+    @Get()
+    getUsers() {
+        return this.usersService.findAll();
     }
 
-    @UseGuards(FirebaseAuthGuard)
-    @Get('me')
-    async getMe(@Req() req: Request) {
-        const firebaseUid = (req.user as any).uid;
-        const user = await this.usersService.findByFirebaseUid(firebaseUid);
-        return {
-            email: user.email,
-            name: user.name,
-            role: user.role,
-        };
-    }
 
-    @UseGuards(FirebaseAuthGuard)
+
+
+    // @UseGuards(FirebaseAuthGuard)
     @Get('search')
     search(
         @Query('name') name?: string,

@@ -43,8 +43,10 @@ let UsersService = class UsersService {
             where: { firebase_uid: uid },
             select: ['email', 'name', 'role'],
         });
-        if (!user)
-            throw new common_1.NotFoundException('Користувача не знайдено');
+        if (!user) {
+            console.log('Користувача не знайдено, створюємо');
+            return null;
+        }
         return user;
     }
     async findUserForAuth(email) {

@@ -3,16 +3,23 @@ import {
     Post,
     Body,
     Get,
-    UseGuards,
+
     Req,
-    BadRequestException,
+    BadRequestException, UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dtos/create-user.dto';
-import { FirebaseAuthGuard } from './firebase-auth.guard';
+// import { FirebaseAuthGuard } from './firebase-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
+import {Public} from "./public.decorator";
+import {FirebaseAuthGuard} from "./firebase-auth.guard";
+
+
+
+console.log('✅ AuthController підключено');
+
 
 @ApiBearerAuth('access-token')
 @Controller('auth')
@@ -22,16 +29,26 @@ export class AuthController {
         private readonly usersService: UsersService
     ) {}
 
-    // 🔐 Тестова реєстрація адміна через Swagger
+
+
+
+
+
+
+    // Тестова реєстрація адміна через Swagger
     @Post('register-admin')
     async registerAdmin() {
         return this.authService.createAdmin();
     }
 
-    // 🔐 Захищений ендпойнт — перевірка токена Firebase
-    @UseGuards(FirebaseAuthGuard)
+    // перевірка токена Firebase
+
     @Get('protected')
     getProtected(@Req() req: Request) {
+        console.log('🔥 INSIDE getProtected()', req.user);
+        console.log('protected   ' , req.user);
+
+
         return {
             message: '✅ Access granted (Firebase Token Valid)',
             user: req.user, // це декодований Firebase токен (uid, email тощо)

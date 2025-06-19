@@ -5,10 +5,7 @@ import { Request } from 'express';
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
-    getUsers(): Promise<import("./entities/user.entity").User[]>;
-    create(createUserDto: CreateUserDto): Promise<import("./entities/user.entity").User>;
-    saveAfterGoogleLogin(body: {
-        firebase_uid: string;
+    saveAfterGoogleLogin(req: Request, body: {
         email: string;
         name: string;
         avatarUrl?: string;
@@ -18,6 +15,8 @@ export declare class UsersController {
         name: string | undefined;
         role: UserRole;
     }>;
+    create(createUserDto: CreateUserDto): Promise<import("./entities/user.entity").User>;
+    getUsers(): Promise<import("./entities/user.entity").User[]>;
     search(name?: string, email?: string, role?: string, page?: string, limit?: string, sortBy?: string, sortOrder?: string): Promise<{
         data: import("./entities/user.entity").User[];
         total: number;

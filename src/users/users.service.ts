@@ -27,6 +27,9 @@ export class UsersService {
             }
         }
 
+
+
+
         const newUser = this.usersRepository.create(createUserDto);
         return await this.usersRepository.save(newUser);
     }
@@ -73,15 +76,15 @@ export class UsersService {
     /**
      * 🔹 Отримати коротку інформацію про користувача за Firebase UID (для /me).
      */
-    async findByFirebaseUid(uid: string): Promise<Pick<User, 'email' | 'name' | 'role'>> {
+    async findByFirebaseUid(uid: string): Promise<Pick<User, 'email' | 'name' | 'role'> | null> {
         const user = await this.usersRepository.findOne({
             where: { firebase_uid: uid },
             select: ['email', 'name', 'role'],
         });
 
-        if (!user) throw new NotFoundException('Користувача не знайдено');
+        if (!user) {console.log('Користувача не знайдено, створюємо'); return null;}
 
-        return user;
+        return user ;
     }
 
 

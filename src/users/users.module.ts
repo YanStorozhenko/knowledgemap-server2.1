@@ -13,7 +13,7 @@ import { UserTopicProgressController } from './user-topic-progress.controller';
 import { Topic } from '../topics/entities/topic.entity';
 import { TopicsModule } from '../topics/topics.module';
 // import {FirebaseAuthGuard} from "../auth/firebase-auth.guard";
-// import {AuthModule} from "../auth/auth.module";
+ import {AuthModule} from "../auth/auth.module";
 
 @Module({
   imports: [

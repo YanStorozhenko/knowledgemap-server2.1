@@ -19,38 +19,47 @@ const create_user_dto_1 = require("./dtos/create-user.dto");
 const roles_decorator_1 = require("../auth/roles.decorator");
 const user_entity_1 = require("./entities/user.entity");
 const swagger_1 = require("@nestjs/swagger");
-const firebase_auth_guard_1 = require("../auth/firebase-auth.guard");
+const firebase_admin_1 = require("../firebase-admin");
+const public_decorator_1 = require("../auth/public.decorator");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
-    getUsers() {
-        return this.usersService.findAll();
-    }
-    create(createUserDto) {
-        return this.usersService.create(createUserDto);
-    }
-    async saveAfterGoogleLogin(body) {
-        const { firebase_uid, email, name, avatarUrl } = body;
-        const existingUser = await this.usersService.findByFirebaseUid(firebase_uid);
+    async saveAfterGoogleLogin(req, body) {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token)
+            throw new common_1.UnauthorizedException('No token provided');
+        const decoded = await firebase_admin_1.admin.auth().verifyIdToken(token);
+        const firebaseUid = decoded.uid;
+        const existingUser = await this.usersService.findByFirebaseUid(firebaseUid);
+        console.log("existingUser" + existingUser);
         if (existingUser)
             return existingUser;
         return this.usersService.create({
-            firebase_uid,
-            email,
-            name,
-            avatarUrl,
+            firebase_uid: firebaseUid,
+            email: body.email,
+            name: body.name,
+            avatarUrl: body.avatarUrl,
             role: user_entity_1.UserRole.STUDENT,
         });
     }
     async getMe(req) {
         const firebaseUid = req.user.uid;
         const user = await this.usersService.findByFirebaseUid(firebaseUid);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Користувача не знайдено');
+        }
         return {
             email: user.email,
             name: user.name,
             role: user.role,
         };
+    }
+    create(createUserDto) {
+        return this.usersService.create(createUserDto);
+    }
+    getUsers() {
+        return this.usersService.findAll();
     }
     search(name, email, role, page, limit, sortBy, sortOrder) {
         return this.usersService.search({
@@ -66,14 +75,22 @@ let UsersController = class UsersController {
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
-    (0, common_1.Get)(),
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('save'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], UsersController.prototype, "getUsers", null);
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "saveAfterGoogleLogin", null);
 __decorate([
-    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getMe", null);
+__decorate([
     (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
@@ -82,22 +99,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "create", null);
 __decorate([
-    (0, common_1.Post)('save'),
-    __param(0, (0, common_1.Body)()),
+    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "saveAfterGoogleLogin", null);
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getUsers", null);
 __decorate([
-    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
-    (0, common_1.Get)('me'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "getMe", null);
-__decorate([
-    (0, common_1.UseGuards)(firebase_auth_guard_1.FirebaseAuthGuard),
     (0, common_1.Get)('search'),
     __param(0, (0, common_1.Query)('name')),
     __param(1, (0, common_1.Query)('email')),

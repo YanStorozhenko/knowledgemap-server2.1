@@ -9,4 +9,5 @@
 .idea
 node_modules/
 .env
+./src/config/firebase-service-account/json
 

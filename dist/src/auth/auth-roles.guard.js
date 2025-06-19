@@ -31,16 +31,12 @@ let AuthRolesGuard = class AuthRolesGuard {
             return true;
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
-        console.log("authHeader---------------------------------------------");
         if (!authHeader?.startsWith('Bearer ')) {
             throw new common_1.UnauthorizedException('Missing token');
         }
         const token = authHeader.split(' ')[1];
         const decoded = await firebase_admin_1.admin.auth().verifyIdToken(token);
-        console.log("authHeader---------------------------------------------");
-        console.log('Decoded ', decoded.uid);
         let user = await this.usersService.findByFirebaseUid(decoded.uid);
-        console.log('user ', user);
         if (!user) {
             user = await this.usersService.create({
                 firebase_uid: decoded.uid,
@@ -55,7 +51,6 @@ let AuthRolesGuard = class AuthRolesGuard {
             name: decoded.name,
             role: user.role,
         };
-        console.log('Decoded user set on request:', request.user);
         const requiredRoles = this.reflector.getAllAndOverride(roles_decorator_1.ROLES_KEY, [
             context.getHandler(),
             context.getClass(),

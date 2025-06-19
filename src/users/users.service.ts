@@ -27,9 +27,6 @@ export class UsersService {
             }
         }
 
-
-
-
         const newUser = this.usersRepository.create(createUserDto);
         return await this.usersRepository.save(newUser);
     }

@@ -31,9 +31,6 @@ export class AuthRolesGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
 
-        // console.log(authHeader);
-        console.log("authHeader---------------------------------------------");
-
 
         if (!authHeader?.startsWith('Bearer ')) {
 
@@ -41,15 +38,11 @@ export class AuthRolesGuard implements CanActivate {
             throw new UnauthorizedException('Missing token');
         }
 
-
         const token = authHeader.split(' ')[1];
         const decoded = await admin.auth().verifyIdToken(token);
-        console.log("authHeader---------------------------------------------");
-        console.log('Decoded ', decoded.uid);
 
         let user = await this.usersService.findByFirebaseUid(decoded.uid);
 
-        console.log('user ', user);
 
         if (!user) {
             // Автоматичне створення користувача при першому вході
@@ -68,8 +61,6 @@ export class AuthRolesGuard implements CanActivate {
             role: user.role,
         };
 
-
-        console.log('Decoded user set on request:', request.user);
 
 
         const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [

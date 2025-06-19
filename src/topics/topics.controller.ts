@@ -14,6 +14,8 @@ export class TopicsController {
         return this.topicsService.findAll();
     }
 
+
+    @Public()
     @Get(':id')
     findOne(@Param('id') id: number) {
         return this.topicsService.findOne(id);

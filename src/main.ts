@@ -15,13 +15,9 @@ async function bootstrap() {
             process.exit(1);
         });
 
-    const app = await NestFactory.create(AppModule, { cors: true });
-
+    const app = await NestFactory.create(AppModule);
     app.enableCors({
-        origin: [
-            'https://knowledgemap-frontend2-0.vercel.app',
-            'http://localhost:5173'
-        ],
+        origin: ['https://knowledgemap-frontend2-0.vercel.app', 'http://localhost:5173'],
         credentials: true,
     });
 

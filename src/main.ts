@@ -7,12 +7,12 @@ import { AuthRolesGuard } from './auth/auth-roles.guard';
 import { UsersService } from './users/users.service';
 
 async function bootstrap() {
-    await AppDataSource.initialize()
-        .then(() => console.log('✅ Database connected successfully'))
-        .catch((error) => {
-            console.error('❌ Database connection failed:', error);
-            process.exit(1);
-        });
+    // await AppDataSource.initialize()
+    //     .then(() => console.log('✅ Database connected successfully'))
+    //     .catch((error) => {
+    //         console.error('❌ Database connection failed:', error);
+    //         process.exit(1);
+    //     });
 
     const app = await NestFactory.create(AppModule);
 

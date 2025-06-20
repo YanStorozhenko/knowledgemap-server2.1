@@ -22,6 +22,8 @@ async function bootstrap() {
     });
 
 
+
+
     // Глобальний префікс
     app.setGlobalPrefix('api');
 

@@ -28,12 +28,16 @@ async function bootstrap() {
         res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
         res.header('Access-Control-Allow-Credentials', 'true');
-        if (req.method === 'OPTIONS') return res.sendStatus(200);
+        if (req.method === 'OPTIONS') {
+            return res.sendStatus(200);
+        }
         next();
     });
 
+    // Глобальний префікс
     app.setGlobalPrefix('api');
 
+    // Swagger конфіг
     const config = new DocumentBuilder()
         .setTitle('API Documentation')
         .setDescription('Документація API Knowledge Map')
@@ -53,6 +57,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
 
+    // Установка глобального гварда
     const reflector = app.get(Reflector);
     const usersService = app.get(UsersService);
     app.useGlobalGuards(new AuthRolesGuard(reflector, usersService));

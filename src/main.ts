@@ -8,9 +8,7 @@ import { UsersService } from './users/users.service';
 
 async function bootstrap() {
     await AppDataSource.initialize()
-        .then(() => {
-            console.log('✅ Database connected successfully');
-        })
+        .then(() => console.log('✅ Database connected successfully'))
         .catch((error) => {
             console.error('❌ Database connection failed:', error);
             process.exit(1);
@@ -18,26 +16,21 @@ async function bootstrap() {
 
     const app = await NestFactory.create(AppModule);
 
+    // Enable CORS
     app.enableCors({
-        origin: ['https://knowledgemap-frontend2-0.vercel.app', 'http://localhost:5173'],
+        origin: [
+            'https://knowledgemap-frontend2-0.vercel.app',
+            'http://localhost:5173',
+        ],
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
+        allowedHeaders: 'Content-Type,Authorization',
     });
 
-    app.use((req, res, next) => {
-        res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-        res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-        res.header('Access-Control-Allow-Credentials', 'true');
-        if (req.method === 'OPTIONS') {
-            return res.sendStatus(200);
-        }
-        next();
-    });
-
-    // Глобальний префікс
+    // Global prefix
     app.setGlobalPrefix('api');
 
-    // Swagger конфіг
+    // Swagger config
     const config = new DocumentBuilder()
         .setTitle('API Documentation')
         .setDescription('Документація API Knowledge Map')
@@ -57,7 +50,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
 
-    // Установка глобального гварда
+    // Set global guard
     const reflector = app.get(Reflector);
     const usersService = app.get(UsersService);
     app.useGlobalGuards(new AuthRolesGuard(reflector, usersService));
@@ -66,7 +59,7 @@ async function bootstrap() {
     await app.listen(port);
 
     console.log(`---- Server running on port ${port}`);
-    console.log(`---Swagger available at http://localhost:${port}/api/docs`);
+    console.log(`--- Swagger available at http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

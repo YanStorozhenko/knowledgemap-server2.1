@@ -3,7 +3,8 @@ import { AppModule } from './app.module';
 import { AppDataSource } from './data-source';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthRolesGuard } from './auth/auth-roles.guard';
+import { UsersService } from './users/users.service';
 
 async function bootstrap() {
     await AppDataSource.initialize()
@@ -16,32 +17,23 @@ async function bootstrap() {
         });
 
     const app = await NestFactory.create(AppModule);
+
     app.enableCors({
         origin: ['https://knowledgemap-frontend2-0.vercel.app', 'http://localhost:5173'],
         credentials: true,
     });
-
 
     app.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
         res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
         res.header('Access-Control-Allow-Credentials', 'true');
-
-        if (req.method === 'OPTIONS') {
-            return res.sendStatus(200);
-        }
-
+        if (req.method === 'OPTIONS') return res.sendStatus(200);
         next();
     });
 
-
-
-
-    // Глобальний префікс
     app.setGlobalPrefix('api');
 
-    // Swagger конфіг
     const config = new DocumentBuilder()
         .setTitle('API Documentation')
         .setDescription('Документація API Knowledge Map')
@@ -62,8 +54,8 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
 
     const reflector = app.get(Reflector);
-    const guard = new (AuthGuard('jwt'))(reflector);
-    console.log('---- JwtAuthGuard instance created:', typeof guard.canActivate === 'function');
+    const usersService = app.get(UsersService);
+    app.useGlobalGuards(new AuthRolesGuard(reflector, usersService));
 
     const port = process.env.PORT || 3001;
     await app.listen(port);

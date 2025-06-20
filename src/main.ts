@@ -32,21 +32,6 @@ async function bootstrap() {
     //     credentials: true,
     // });
 
-//////////////
-    app.use((req, res, next) => {
-        res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-        res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-        res.header('Access-Control-Allow-Credentials', 'true');
-
-        if (req.method === 'OPTIONS') {
-            return res.sendStatus(200);
-        }
-
-        next();
-    });
-//////////////
-
 
 
     // Global prefix
@@ -77,11 +62,14 @@ async function bootstrap() {
     const usersService = app.get(UsersService);
     app.useGlobalGuards(new AuthRolesGuard(reflector, usersService));
 
-    const port = Number ( process.env.PORT);
+    const port = Number(process.env.PORT) || 3001;
+    console.log('Server initializing...', process.env.PORT, process.cwd());
+
+
     await app.listen(port);
 
     console.log(`---- Server running on port ${port}`);
-    console.log(`--- Swagger available at http://localhost:${port}/api/docs`);
+    // console.log(`--- Swagger available at http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

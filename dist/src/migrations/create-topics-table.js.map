@@ -1,1 +1,0 @@
-{"version":3,"file":"create-topics-table.js","sourceRoot":"","sources":["../../../src/migrations/create-topics-table.ts"],"names":[],"mappings":";;AAGA,8CAaC;AAhBD,gDAA+C;AAGxC,KAAK,UAAU,iBAAiB;IACnC,MAAM,WAAW,GAAgB,2BAAa,CAAC,iBAAiB,EAAE,CAAC;IACnE,MAAM,WAAW,CAAC,OAAO,EAAE,CAAC;IAE5B,MAAM,WAAW,CAAC,KAAK,CAAC;;;;;;KAMvB,CAAC,CAAC;IAEH,MAAM,WAAW,CAAC,OAAO,EAAE,CAAC;AAChC,CAAC"}

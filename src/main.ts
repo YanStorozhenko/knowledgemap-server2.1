@@ -17,7 +17,7 @@ async function bootstrap() {
 
     const app = await NestFactory.create(AppModule, { cors: true });
 
-    // ⛳ Глобальний префікс
+    // Глобальний префікс
     app.setGlobalPrefix('api');
 
     // Swagger конфіг
@@ -42,13 +42,13 @@ async function bootstrap() {
 
     const reflector = app.get(Reflector);
     const guard = new (AuthGuard('jwt'))(reflector);
-    console.log('🧪 JwtAuthGuard instance created:', typeof guard.canActivate === 'function');
+    console.log('---- JwtAuthGuard instance created:', typeof guard.canActivate === 'function');
 
     const port = process.env.PORT || 3001;
     await app.listen(port);
 
-    console.log(`🚀 Server running on port ${port}`);
-    console.log(`📄 Swagger available at http://localhost:${port}/api/docs`);
+    console.log(`---- Server running on port ${port}`);
+    console.log(`---Swagger available at http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

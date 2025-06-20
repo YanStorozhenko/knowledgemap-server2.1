@@ -55,7 +55,7 @@ async function bootstrap() {
     const usersService = app.get(UsersService);
     app.useGlobalGuards(new AuthRolesGuard(reflector, usersService));
 
-    const port = process.env.PORT || 3001;
+    const port = Number ( process.env.PORT);
     await app.listen(port);
 
     console.log(`---- Server running on port ${port}`);
